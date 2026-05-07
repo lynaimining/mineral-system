@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>找矿Agent完整架构图</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Microsoft YaHei', sans-serif; background: #f0f2f5; padding: 30px; }
+
+  .title { text-align: center; font-size: 20px; font-weight: bold; color: #1a1a2e; margin-bottom: 8px; }
+  .subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 25px; }
+
+  /* 图例 */
+  .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+
+  /* 入口层 */
+  .entry-layer {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 15px 25px; border-radius: 10px; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 15px;
+    color: white; font-weight: 600; font-size: 15px;
+  }
+
+  /* 顶部流程条 */
+  .pipeline { display: flex; align-items: center; margin-bottom: 20px; }
+  .pipeline-step {
+    flex: 1; text-align: center; padding: 10px 8px;
+    border-radius: 6px; font-size: 12px; font-weight: 600;
+    position: relative;
+  }
+  .pipeline-arrow {
+    width: 28px; flex-shrink: 0; text-align: center;
+    font-size: 18px; color: #aaa;
+  }
+  .step-existing { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+  .step-new { background: #fff3cd; color: #856404; border: 2px dashed #ffc107; }
+  .step-output { background: #d1ecf1; color: #0c5460; border: 2px dashed #17a2b8; }
+  .badge {
+    position: absolute; top: -10px; right: -6px;
+    background: #ff4757; color: white; font-size: 10px;
+    padding: 2px 6px; border-radius: 10px; font-weight: bold;
+  }
+
+  /* 主体列布局 */
+  .columns { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 20px; }
+  .column { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+  /* 模块卡片 */
+  .module {
+    border-radius: 8px; padding: 12px;
+    font-size: 12px; line-height: 1.5;
+  }
+  .module-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+  .module-tag {
+    display: inline-block; font-size: 10px; padding: 1px 6px;
+    border-radius: 10px; margin-bottom: 6px; font-weight: 600;
+  }
+  .module ul { padding-left: 14px; color: #555; }
+  .module ul li { margin-bottom: 2px; }
+
+  /* 已有模块 */
+  .mod-green { background: #e8f5e9; border: 1.5px solid #66bb6a; }
+  .mod-green .module-title { color: #2e7d32; }
+  .mod-green .module-tag { background: #c8e6c9; color: #1b5e20; }
+
+  .mod-pink { background: #fce4ec; border: 1.5px solid #f48fb1; }
+  .mod-pink .module-title { color: #880e4f; }
+  .mod-pink .module-tag { background: #f8bbd0; color: #880e4f; }
+
+  .mod-orange { background: #fff3e0; border: 1.5px solid #ffb74d; }
+  .mod-orange .module-title { color: #e65100; }
+  .mod-orange .module-tag { background: #ffe0b2; color: #bf360c; }
+
+  /* 新增模块 */
+  .mod-new-yellow {
+    background: #fffde7; border: 2px dashed #fdd835;
+    position: relative;
+  }
+  .mod-new-yellow .module-title { color: #f57f17; }
+  .mod-new-yellow .module-tag { background: #fff9c4; color: #f57f17; }
+
+  .mod-new-purple {
+    background: #f3e5f5; border: 2px dashed #ab47bc;
+    position: relative;
+  }
+  .mod-new-purple .module-title { color: #6a1b9a; }
+  .mod-new-purple .module-tag { background: #e1bee7; color: #6a1b9a; }
+
+  .mod-new-blue {
+    background: #e3f2fd; border: 2px dashed #42a5f5;
+    position: relative;
+  }
+  .mod-new-blue .module-title { color: #0d47a1; }
+  .mod-new-blue .module-tag { background: #bbdefb; color: #0d47a1; }
+
+  .mod-output {
+    background: #e0f7fa; border: 2px solid #26c6da;
+  }
+  .mod-output .module-title { color: #006064; }
+  .mod-output .module-tag { background: #b2ebf2; color: #006064; }
+
+  .new-label {
+    position: absolute; top: -10px; left: 10px;
+    background: #ff4757; color: white; font-size: 10px;
+    padding: 2px 8px; border-radius: 10px; font-weight: bold;
+  }
+
+  /* 列标题 */
+  .col-header {
+    text-align: center; font-size: 12px; font-weight: 700;
+    padding: 6px; border-radius: 6px; margin-bottom: 4px;
+  }
+  .col-existing { background: #e8f5e9; color: #2e7d32; }
+  .col-new { background: #fff9c4; color: #f57f17; border: 1.5px dashed #fdd835; }
+  .col-output { background: #e0f7fa; color: #006064; border: 1.5px dashed #26c6da; }
+
+  /* 分隔线 */
+  .divider {
+    width: 2px; background: repeating-linear-gradient(to bottom, #ccc 0, #ccc 6px, transparent 6px, transparent 12px);
+    align-self: stretch; margin: 0 4px; flex-shrink: 0;
+  }
+
+  /* 底部支撑层 */
+  .support-layer {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    margin-bottom: 20px;
+  }
+  .support-box {
+    padding: 15px; border-radius: 10px; border: 2px solid;
+  }
+
+  /* 反馈闭环 */
+  .feedback-loop {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    padding: 15px 20px; border-radius: 10px;
+    color: white; text-align: center; font-weight: 600;
+    position: relative;
+  }
+  .feedback-arrow {
+    position: absolute; left: 50%; top: -25px;
+    font-size: 30px; color: #f5576c;
+    transform: translateX(-50%);
+  }
+
+  /* 底部说明 */
+  .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #999; }
+</style>
+</head>
+<body>
+
+<div class="title">区域找矿潜力预测 Agent — 完整架构方案</div>
+<div class="subtitle">灰色虚线框 = 新增模块 | 实线框 = 已有模块 | 紫色渐变 = 入口/支撑/闭环</div>
+
+<!-- 图例 -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#c8e6c9; border:1.5px solid #66bb6a;"></div>
+    <span>已有模块</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:#fff9c4; border:2px dashed #fdd835;"></div>
+    <span>新增模块</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:linear-gradient(135deg, #667eea, #764ba2);"></div>
+    <span>入口/支撑/闭环</span>
+  </div>
+</div>
+
+<!-- 入口层 -->
+<div class="entry-layer">
+  <div style="font-size: 24px;">🎯</div>
+  <div>
+    <div style="font-size: 16px;">矿种选择器（系统入口）</div>
+    <div style="font-size: 12px; font-weight: 400; margin-top: 4px;">用户选择：金矿 / 铜矿 → 驱动对应知识库和评分规则</div>
+  </div>
+  <div style="font-size: 24px;">🎯</div>
+</div>
+
+<!-- 顶部流程条 -->
+<div class="pipeline">
+  <div class="pipeline-step step-existing">数据处理</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step step-new" style="position:relative;">
+    质量评估
+    <span class="badge">NEW</span>
+  </div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step step-existing">可视化</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step step-existing">空间描述</div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step step-new" style="position:relative;">
+    空间推理
+    <span class="badge">NEW</span>
+  </div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step step-new" style="position:relative;">
+    专家审核
+    <span class="badge">NEW</span>
+  </div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step step-output" style="position:relative;">
+    输出交付
+    <span class="badge" style="background:#17a2b8;">NEW</span>
+  </div>
+</div>
+
+<!-- 主体列 -->
+<div class="columns">
+
+  <!-- 列1：数据处理（已有） -->
+  <div class="column">
+    <div class="col-header col-existing">数据处理层 ✅</div>
+
+    <div class="module mod-green">
+      <div class="module-tag">AutoDL推理</div>
+      <div class="module-title">岩性预测模块</div>
+      <ul><li>遥感影像分类</li><li>岩性单元识别</li></ul>
+    </div>
+
+    <div class="module mod-green">
+      <div class="module-tag">遥感影像</div>
+      <div class="module-title">蚀变计算模块</div>
+      <ul><li>蚀变强度计算</li><li>蚀变类型识别</li></ul>
+    </div>
+
+    <div class="module mod-green">
+      <div class="module-tag">矢量提取</div>
+      <div class="module-title">图层矢量提取</div>
+      <ul><li>断层线提取</li><li>矿点、矿权</li></ul>
+    </div>
+
+    <div class="module mod-green">
+      <div class="module-tag">地球物理</div>
+      <div class="module-title">地球物理处理</div>
+      <ul><li>重力、航磁</li><li>航放数据处理</li></ul>
+    </div>
+  </div>
+
+  <!-- 列2：质量评估（新增） -->
+  <div class="column">
+    <div class="col-header col-new">质量评估层 🆕</div>
+
+    <div class="module mod-new-yellow" style="position:relative;">
+      <span class="new-label">NEW</span>
+      <div class="module-tag">数据质检</div>
+      <div class="module-title">数据质量评估</div>
+      <ul>
+        <li>覆盖度检查</li>
+        <li>缺失值统计</li>
+        <li>质量评分（0-100）</li>
+        <li>→ 驱动权重调整</li>
+        <li>→ 驱动置信度标注</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 列3：可视化（已有） -->
+  <div class="column">
+    <div class="col-header col-existing">可视化层 ✅</div>
+
+    <div class="module mod-pink">
+      <div class="module-tag">图层管理</div>
+      <div class="module-title">图层控制功能</div>
+      <ul><li>图层开关</li><li>透明度调节</li></ul>
+    </div>
+
+    <div class="module mod-pink">
+      <div class="module-tag">底图</div>
+      <div class="module-title">底图切换功能</div>
+      <ul><li>天地图</li><li>地形图、矢量图</li></ul>
+    </div>
+
+    <div class="module mod-pink">
+      <div class="module-tag">TiTiler</div>
+      <div class="module-title">实时渲染功能</div>
+      <ul><li>动态切片服务</li><li>COG实时渲染</li></ul>
+    </div>
+  </div>
+
+  <!-- 列4：空间描述（已有） -->
+  <div class="column">
+    <div class="col-header col-existing">空间描述层 ✅</div>
+
+    <div class="module mod-orange">
+      <div class="module-tag">Gemma 4 31B</div>
+      <div class="module-title">空间描述与统计</div>
+      <ul><li>自然语言问答</li><li>图层统计分析</li><li>空间关系描述</li></ul>
+    </div>
+  </div>
+
+  <!-- 分隔线 -->
+  <div class="divider"></div>
+
+  <!-- 列5：空间推理（新增） -->
+  <div class="column">
+    <div class="col-header col-new">空间推理层 🆕</div>
+
+    <div class="module mod-new-yellow" style="position:relative;">
+      <span class="new-label">NEW</span>
+      <div class="module-tag">数据融合</div>
+      <div class="module-title">空间采样层</div>
+      <ul>
+        <li>500m×500m网格</li>
+        <li>栅格+矢量统一</li>
+        <li>五要素特征提取</li>
+      </ul>
+    </div>
+
+    <div class="module mod-new-yellow" style="position:relative;">
+      <span class="new-label">NEW</span>
+      <div class="module-tag">规则引擎</div>
+      <div class="module-title">五要素评分器</div>
+      <ul>
+        <li>岩性、构造、蚀变</li>
+        <li>地化、地物</li>
+        <li>动态权重归一化</li>
+        <li>矿种自适应权重</li>
+        <li>置信度标注</li>
+      </ul>
+    </div>
+
+    <div class="module mod-new-purple" style="position:relative;">
+      <span class="new-label">NEW</span>
+      <div class="module-tag">ML模型</div>
+      <div class="module-title">数据驱动评分器</div>
+      <ul>
+        <li>集成学习模型</li>
+        <li>已知矿点训练</li>
+        <li>靶区聚类算法</li>
+      </ul>
+    </div>
+
+    <div class="module mod-new-blue" style="position:relative;">
+      <span class="new-label">NEW</span>
+      <div class="module-tag">Gemma 4 31B</div>
+      <div class="module-title">成矿逻辑推理器</div>
+      <ul>
+        <li>本地部署（AutoDL）</li>
+        <li>结构化Prompt</li>
+        <li>成矿规律知识库</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 列6：专家审核（新增） -->
+  <div class="column">
+    <div class="col-header col-new">专家审核层 🆕</div>
+
+    <div class="module mod-new-purple" style="position:relative;">
+      <span class="new-label">NEW</span>
+      <div class="module-tag">Human-in-the-loop</div>
+      <div class="module-title">地质专家审核</div>
+      <ul>
+        <li>审核靶区合理性</li>
+        <li>调整评分/增删靶区</li>
+        <li>审核报告草稿</li>
+        <li>补充地质解释</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 列7：输出（新增） -->
+  <div class="column">
+    <div class="col-header col-output">输出交付层 🆕</div>
+
+    <div class="module mod-output">
+      <div class="module-tag">Layer 1</div>
+      <div class="module-title">🗺️ 潜力热力图</div>
+      <ul>
+        <li>GeoTIFF格式</li>
+        <li>叠加到TiTiler</li>
+        <li>0-100分色阶</li>
+      </ul>
+    </div>
+
+    <div class="module mod-output">
+      <div class="module-tag">Layer 2</div>
+      <div class="module-title">📍 靶区列表</div>
+      <ul>
+        <li>Top N靶区坐标</li>
+        <li>综合评分排序</li>
+        <li>主控因素说明</li>
+      </ul>
+    </div>
+
+    <div class="module mod-output">
+      <div class="module-tag">Layer 3</div>
+      <div class="module-title">📄 分析报告</div>
+      <ul>
+        <li>成矿逻辑解释</li>
+        <li>勘探建议</li>
+        <li>Word/PDF格式</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- 底部支撑层 -->
+<div class="support-layer">
+  <!-- 知识库 -->
+  <div class="support-box" style="background: linear-gradient(135deg, #ffecd2, #fcb69f); border-color: #ff6b6b;">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+      <div style="font-size: 24px;">📚</div>
+      <div style="font-weight: 700; font-size: 14px; color: #c92a2a;">成矿知识库（底层支撑）</div>
+    </div>
+    <ul style="font-size: 12px; padding-left: 20px; color: #555; line-height: 1.6;">
+      <li><strong>gold-ore skill:</strong> 7大金矿类型 + 5大成矿域</li>
+      <li><strong>copper-ore skill:</strong> 7大铜矿类型 + 5大成矿域</li>
+      <li><strong>geological-targeting skill:</strong> 靶区优选规则</li>
+      <li><strong>mineral-system-eval skill:</strong> 五要素评分框架</li>
+    </ul>
+  </div>
+
+  <!-- Gemma 4 31B -->
+  <div class="support-box" style="background: linear-gradient(135deg, #e0c3fc, #8ec5fc); border-color: #7c4dff;">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+      <div style="font-size: 24px;">🧠</div>
+      <div style="font-weight: 700; font-size: 14px; color: #4527a0;">Gemma 4 31B（统一LLM底座）</div>
+    </div>
+    <ul style="font-size: 12px; padding-left: 20px; color: #555; line-height: 1.6;">
+      <li><strong>驱动模块1:</strong> 空间描述与统计（已有）</li>
+      <li><strong>驱动模块2:</strong> 成矿逻辑推理器（新增）</li>
+      <li><strong>部署方式:</strong> 本地AutoDL，数据不出内网</li>
+      <li><strong>后续能力:</strong> 可LoRA微调，支持地质图视觉识别</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 数据反馈闭环 -->
+<div class="feedback-loop" style="position: relative;">
+  <div class="feedback-arrow">↻</div>
+  <div style="font-size: 15px; margin-bottom: 6px;">🔄 数据反馈闭环（系统自优化）</div>
+  <div style="font-size: 12px; font-weight: 400;">
+    每个项目完成后，预测结果 vs 实际勘探结果 → 反馈到ML模型和规则权重 → 系统越用越准
+  </div>
+</div>
+
+<div class="footer">
+  虚线框 = 本次新增 &nbsp;|&nbsp; 阶段1: 规则引擎（3-4周）&nbsp;|&nbsp; 阶段2: ML模型（6-8周）&nbsp;|&nbsp; 阶段3: Gemma 4推理（2-3周）
+</div>
+
+</body>
+</html>
