@@ -1,0 +1,352 @@
+[
+  {
+    "source_file": "2016_Mineral Resource and Ore Reserve Upgrade.pdf",
+    "metadata": {
+      "project_name": "2016_Mineral Resource and Ore Reserve Upgrade.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2017 Annual Update of Mineral Resources & Ore Reserves.pdf",
+    "metadata": {
+      "project_name": "2017 Annual Update of Mineral Resources & Ore Reserves.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2017_Nicolsons Project Mineral Resource & Ore Reserve Update.pdf",
+    "metadata": {
+      "project_name": "2017_Nicolsons Project Mineral Resource & Ore Reserve Update.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2018 Annual Update of Mineral Resources & Ore Reserves.pdf",
+    "metadata": {
+      "project_name": "2018 Annual Update of Mineral Resources & Ore Reserves.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2018_Nicolsons Project Mineral Resource & Ore Reserve Update.pdf",
+    "metadata": {
+      "project_name": "2018_Nicolsons Project Mineral Resource & Ore Reserve Update.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2018_Wagtail Underground Mineral Resource and Ore Reserve.pdf",
+    "metadata": {
+      "project_name": "2018_Wagtail Underground Mineral Resource and Ore Reserve.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {
+      "indicated_tonnage": 6.8,
+      "inferred_tonnage": 7.0
+    },
+    "extraction_success": true
+  },
+  {
+    "source_file": "2019 Annual Update of Mineral Resources & Ore Reserves.pdf",
+    "metadata": {
+      "project_name": "2019 Annual Update of Mineral Resources & Ore Reserves.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2019_Halls Creek Project Mineral Resource & Ore Reserve Update.pdf",
+    "metadata": {
+      "project_name": "2019_Halls Creek Project Mineral Resource & Ore Reserve Update.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2019_Wagtail Mineral Resource, Ore Reserve and Operations Update.pdf",
+    "metadata": {
+      "project_name": "2019_Wagtail Mineral Resource, Ore Reserve and Operations Update.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {
+      "indicated_tonnage": 7.8,
+      "inferred_tonnage": 4.5
+    },
+    "extraction_success": true
+  },
+  {
+    "source_file": "2020_Halls Creek Project Mineral Resource & Ore Reserve Update.pdf",
+    "metadata": {
+      "project_name": "2020_Halls Creek Project Mineral Resource & Ore Reserve Update.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2021_Annual Mineral Resource & Ore Reserve Statement.pdf",
+    "metadata": {
+      "project_name": "2021_Annual Mineral Resource & Ore Reserve Statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2021_Green Lantern Maiden Mineral Resource and Ore Reserve.pdf",
+    "metadata": {
+      "project_name": "2021_Green Lantern Maiden Mineral Resource and Ore Reserve.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2022 Resources and Reserve Statement - Amended.pdf",
+    "metadata": {
+      "project_name": "2022 Resources and Reserve Statement - Amended.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2022 Resources and Reserve Statement.pdf",
+    "metadata": {
+      "project_name": "2022 Resources and Reserve Statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2022_Annual Mineral Resource and Ore Reserve Statement.pdf",
+    "metadata": {
+      "project_name": "2022_Annual Mineral Resource and Ore Reserve Statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2022_Mineral Resource and Ore Reserve update at Green Lantern.pdf",
+    "metadata": {
+      "project_name": "2022_Mineral Resource and Ore Reserve update at Green Lantern.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2022_Scotia Mineral Resource and Ore Reserve Update.pdf",
+    "metadata": {
+      "project_name": "2022_Scotia Mineral Resource and Ore Reserve Update.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2023 Resource and Reserves Statement.pdf",
+    "metadata": {
+      "project_name": "2023 Resource and Reserves Statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2023_Annual Mineral Resource and Ore Reserve Statement.pdf",
+    "metadata": {
+      "project_name": "2023_Annual Mineral Resource and Ore Reserve Statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {
+      "grade": 24.2
+    },
+    "extraction_success": true
+  },
+  {
+    "source_file": "2024 Mineral Resource Estimate and Ore Reserves - Updated.pdf",
+    "metadata": {
+      "project_name": "2024 Mineral Resource Estimate and Ore Reserves - Updated.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2024 Mineral Resource Estimate and Ore Reserves.pdf",
+    "metadata": {
+      "project_name": "2024 Mineral Resource Estimate and Ore Reserves.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2024_Annual Mineral Resource and Ore Reserve Statement.pdf",
+    "metadata": {
+      "project_name": "2024_Annual Mineral Resource and Ore Reserve Statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {
+      "grade": 32.2
+    },
+    "extraction_success": true
+  },
+  {
+    "source_file": "2025 Annual Mineral Resource and Ore Reserve Statement.pdf",
+    "metadata": {
+      "project_name": "2025 Annual Mineral Resource and Ore Reserve Statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {
+      "measured_tonnage": 1.4,
+      "indicated_tonnage": 3.8,
+      "inferred_tonnage": 3.1
+    },
+    "extraction_success": true
+  },
+  {
+    "source_file": "2025 Mineral Resource Estimate and Ore Reserves.pdf",
+    "metadata": {
+      "project_name": "2025 Mineral Resource Estimate and Ore Reserves.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2025_Annual Mineral Resource and Ore Reserve Statement.pdf",
+    "metadata": {
+      "project_name": "2025_Annual Mineral Resource and Ore Reserve Statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "2025_FY26 guidance and annual Resource & Reserve statement.pdf",
+    "metadata": {
+      "project_name": "2025_FY26 guidance and annual Resource & Reserve statement.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "Amended Announcement - 2018 Mineral Resource & Ore Reserve.pdf",
+    "metadata": {
+      "project_name": "Amended Announcement - 2018 Mineral Resource & Ore Reserve.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  },
+  {
+    "source_file": "Mineral Resources and Ore Reserves 2020.pdf",
+    "metadata": {
+      "project_name": "Mineral Resources and Ore Reserves 2020.pdf",
+      "country": null,
+      "report_date": null
+    },
+    "opex": {},
+    "capex": {},
+    "resources": {},
+    "extraction_success": false
+  }
+]
