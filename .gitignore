@@ -3,3 +3,8 @@ __pycache__/
 *.pyc
 reports/
 *.pdf
+node_modules/
+.superpowers/
+*.db
+kobold-metals-ppt/
+LynAI平台/

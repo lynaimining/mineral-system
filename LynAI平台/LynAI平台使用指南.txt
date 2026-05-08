@@ -1,0 +1,91 @@
+============================================================
+  LynAI Platform 使用指南
+  项目路径：C:\Users\39555\projects\lynai-platform\
+============================================================
+
+【如何找到 Claude（AI助手）】
+--------------------------------------------------------------
+打开命令行（Win+R → 输入 cmd → 回车），输入：
+    claude
+
+这就是你的 AI 助手，可以继续开发这个项目。
+
+或者在任意文件夹右键 → "在终端中打开" → 输入 claude
+
+
+【如何启动 LynAI 平台】
+--------------------------------------------------------------
+需要同时开两个命令行窗口：
+
+  窗口1 - 启动后端（API服务）：
+    cd C:\Users\39555\projects\lynai-platform\backend
+    python -m uvicorn app.main:app --reload --port 8000
+
+  窗口2 - 启动前端（网页界面）：
+    cd C:\Users\39555\projects\lynai-platform\frontend
+    npm run dev
+
+两个都启动后，浏览器访问：http://localhost:3000
+
+
+【快捷方式】
+--------------------------------------------------------------
+双击桌面上的 "启动LynAI平台.bat" 可自动开两个窗口
+
+
+【项目结构】
+--------------------------------------------------------------
+backend/  → Python FastAPI 后端
+  app/
+    main.py          - 服务入口
+    .env             - API Key 配置（重要！）
+    services/
+      agent_engine.py  - AI 处理逻辑
+
+frontend/ → Next.js 前端网页
+  src/app/
+    dashboard/       - 工具选择页
+    tasks/           - 任务管理页
+    login/           - 登录页
+
+
+【API Key 配置】
+--------------------------------------------------------------
+文件位置：C:\Users\39555\projects\lynai-platform\backend\.env
+
+当前配置：
+  ANTHROPIC_API_KEY = cr_47085... (claude-code.club)
+  ANTHROPIC_BASE_URL = https://api.claude-code.club
+  CLAUDE_MODEL = claude-haiku-4-5-20251001
+
+如需换成官方 Anthropic Key：
+  ANTHROPIC_API_KEY = sk-ant-你的key
+  ANTHROPIC_BASE_URL =         ← 清空这行
+  CLAUDE_MODEL = claude-haiku-4-5-20251001
+
+
+【常见问题】
+--------------------------------------------------------------
+Q: 后端启动报错 "port already in use"
+A: 端口被占用，换个端口：
+   python -m uvicorn app.main:app --reload --port 8001
+   同时在 frontend/src/lib/api.ts 第1行把 8000 改成 8001
+
+Q: 任务一直显示 "pending"
+A: 检查后端是否正常运行，以及 .env 里的 API Key 是否有效
+
+Q: 前端显示空白
+A: 确认前端已启动（npm run dev），然后刷新浏览器
+
+
+【继续开发】
+--------------------------------------------------------------
+告诉 Claude（claude 命令）你想做什么，例如：
+  "帮我把 chinese-paper skill 接入 LynAI 平台"
+  "给 LynAI 平台加一个用户管理页面"
+  "修复任务进度不更新的问题"
+
+============================================================
+  生成时间：2026-03-28
+  项目：LynAI Platform MVP
+============================================================

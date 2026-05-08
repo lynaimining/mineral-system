@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 720pt; height: 405pt;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0a1628; color: #ffffff; overflow: hidden;
+    }
+    .container { width: 100%; height: 100%; padding: 28pt; display: flex; flex-direction: column; }
+    .header { margin-bottom: 18pt; }
+    .title { font-size: 26pt; font-weight: 700; line-height: 1.2; margin-bottom: 6pt; color: #60a5fa; }
+    .subtitle { font-size: 13pt; font-weight: 400; color: #94a3b8; line-height: 1.4; }
+    .main { display: flex; gap: 24pt; flex: 1; }
+    .left-col { flex: 0 0 280pt; }
+    .right-col { flex: 1; }
+    .section { margin-bottom: 20pt; }
+    .section-title { font-size: 14pt; font-weight: 600; margin-bottom: 10pt; color: #fbbf24; }
+    .section-content { font-size: 11pt; line-height: 1.6; color: #cbd5e1; }
+    .bullet { margin-bottom: 8pt; padding-left: 16pt; position: relative; }
+    .bullet:before { content: '•'; position: absolute; left: 0; color: #60a5fa; }
+    .timeline { flex: 1; }
+    .milestone { margin-bottom: 16pt; padding-left: 20pt; border-left: 3pt solid #334155; position: relative; }
+    .milestone.highlight { border-left-color: #fbbf24; }
+    .milestone-year { font-size: 18pt; font-weight: 700; color: #60a5fa; margin-bottom: 4pt; }
+    .milestone-title { font-size: 13pt; font-weight: 600; margin-bottom: 6pt; color: #ffffff; }
+    .milestone-desc { font-size: 10pt; line-height: 1.5; color: #94a3b8; }
+    .milestone-icon { position: absolute; left: -8pt; top: 2pt; width: 14pt; height: 14pt;
+                      background: #334155; border-radius: 50%; }
+    .milestone.highlight .milestone-icon { background: #fbbf24; }
+    .footer { margin-top: auto; padding-top: 12pt; border-top: 1pt solid #1e293b; }
+    .footer-text { font-size: 11pt; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Kobold Metals - AI-Driven Mineral Exploration Revolution</h1>
+      <p class="subtitle">Redefining Critical Mineral Discovery with Machine Learning</p>
+    </div>
+    <div class="main">
+      <div class="left-col">
+        <div class="section">
+          <h2 class="section-title">🤖 Technology Core</h2>
+          <div class="section-content">
+            <p class="bullet">Machine Learning + Big Data driven exploration</p>
+            <p class="bullet">Integrating geology, geochemistry, geophysics, and remote sensing multi-source data</p>
+            <p class="bullet">Predicting mineralization potential zones, improving exploration success rate</p>
+          </div>
+        </div>
+        <div class="section">
+          <h2 class="section-title">💰 Investment Backing</h2>
+          <div class="section-content">
+            <p class="bullet">Bill Gates' Breakthrough Energy Ventures</p>
+            <p class="bullet">Top Silicon Valley VCs</p>
+            <p class="bullet">Valuation: $1B+ (Unicorn status)</p>
+          </div>
+        </div>
+      </div>
+      <div class="right-col">
+        <div class="timeline">
+          <div class="milestone">
+            <div class="milestone-icon"></div>
+            <h3 class="milestone-year">2018</h3>
+            <h4 class="milestone-title">Founded</h4>
+            <p class="milestone-desc">Silicon Valley AI team + Geology experts</p>
+          </div>
+          <div class="milestone highlight">
+            <div class="milestone-icon"></div>
+            <h3 class="milestone-year">2022 🎯</h3>
+            <h4 class="milestone-title">Mingomba Copper Discovery, Zambia</h4>
+            <p class="milestone-desc">AI prediction validated • World-class copper deposit • BREAKTHROUGH MOMENT</p>
+          </div>
+          <div class="milestone">
+            <div class="milestone-icon"></div>
+            <h3 class="milestone-year">2026 🚀</h3>
+            <h4 class="milestone-title">DRC Lithium Project Launch</h4>
+            <p class="milestone-desc">World's largest lithium exploration campaign • Critical battery metals strategic positioning</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <p class="footer-text">⚡ Strategic Mission: Powering the global energy transition with critical minerals (Li/Cu/Co/Ni)</p>
+    </div>
+  </div>
+</body>
+</html>
