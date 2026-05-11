@@ -1,1601 +1,352 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COPPER MINE VALUATION TOOL</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>铜矿估值计算器 | Copper Mine Valuation Tool</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0d0d0d;
-    --surface-1: #141414;
-    --surface-2: #1a1a1a;
-    --surface-3: #202020;
-    --border: #2a2a2a;
-    --border-bright: #3a3a3a;
-    --copper: #c96a4c;
-    --copper-dim: #8a4a2e;
-    --copper-bright: #e88a6a;
-    --text-primary: #e8e8e8;
-    --text-secondary: #888888;
-    --text-dim: #555555;
-    --green: #4caf7d;
-    --red: #c94c4c;
-    --amber: #c9844c;
-    --china-red: #c94c4c;
-    --china-red-dim: #8a2e2e;
-    --mono: 'IBM Plex Mono', monospace;
-    --sans: 'IBM Plex Sans', sans-serif;
-  }
-
-  html, body {
-    background: var(--bg);
-    color: var(--text-primary);
-    font-family: var(--sans);
-    font-size: 13px;
-    line-height: 1.5;
-    min-height: 100vh;
-  }
-
-  body {
-    background-image:
-      linear-gradient(rgba(201,168,76,0.015) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,168,76,0.015) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-
-  /* ── HEADER ── */
-  .header {
-    background: var(--surface-1);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 32px 16px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-  }
-  .header-left {}
-  .header-title {
-    font-family: var(--mono);
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--text-primary);
-    text-transform: uppercase;
-  }
-  .header-title span { color: var(--copper); }
-  .header-underline {
-    height: 2px;
-    background: linear-gradient(90deg, var(--copper), transparent);
-    margin-top: 6px;
-    width: 340px;
-  }
-  .header-meta {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-    text-align: right;
-  }
-  .header-meta .live {
-    color: var(--green);
-    font-weight: 600;
-  }
-
-  /* ── LAYOUT ── */
-  .main {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    grid-template-rows: auto 1fr;
-    gap: 0;
-    min-height: calc(100vh - 80px);
-  }
-
-  /* ── INPUT PANEL ── */
-  .input-panel {
-    background: var(--surface-1);
-    border-right: 1px solid var(--border);
-    padding: 24px;
-    overflow-y: auto;
-    grid-row: 1 / 3;
-  }
-
-  .section-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    color: var(--copper-dim);
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .field-group { margin-bottom: 18px; }
-  .field-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-secondary);
-    letter-spacing: 0.06em;
-    margin-bottom: 6px;
-    display: block;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 6px;
-    align-items: stretch;
-  }
-
-  input[type="number"], select {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    font-family: var(--mono);
-    font-size: 14px;
-    padding: 8px 10px;
-    outline: none;
-    transition: border-color 0.15s;
-    -moz-appearance: textfield;
-  }
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-  input[type="number"]:focus, select:focus {
-    border-color: var(--copper-dim);
-  }
-  input[type="number"].full, select.full { width: 100%; }
-
-  .unit-toggle {
-    display: flex;
-    border: 1px solid var(--border);
-  }
-  .unit-btn {
-    background: var(--surface-2);
-    border: none;
-    color: var(--text-secondary);
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.04em;
-  }
-  .unit-btn.active {
-    background: var(--copper-dim);
-    color: var(--bg);
-    font-weight: 600;
-  }
-  .unit-btn:hover:not(.active) { background: var(--surface-3); color: var(--text-primary); }
-
-  /* Radio buttons */
-  .radio-group {
-    display: flex;
-    gap: 0;
-    border: 1px solid var(--border);
-  }
-  .radio-btn {
-    flex: 1;
-    background: var(--surface-2);
-    border: none;
-    border-right: 1px solid var(--border);
-    color: var(--text-secondary);
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 8px 4px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.04em;
-    text-align: center;
-  }
-  .radio-btn:last-child { border-right: none; }
-  .radio-btn.active {
-    background: var(--copper-dim);
-    color: var(--bg);
-    font-weight: 600;
-  }
-  .radio-btn:hover:not(.active) { background: var(--surface-3); color: var(--text-primary); }
-
-  /* Collapsible */
-  .collapsible-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    padding: 10px 0;
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-    user-select: none;
-  }
-  .collapsible-header:hover .section-label { color: var(--copper); }
-  .collapsible-arrow {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    transition: transform 0.2s;
-  }
-  .collapsible-arrow.open { transform: rotate(90deg); }
-  .collapsible-body {
-    display: none;
-    padding-top: 8px;
-  }
-  .collapsible-body.open { display: block; }
-
-  /* Slider */
-  .slider-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  input[type="range"] {
-    flex: 1;
-    -webkit-appearance: none;
-    height: 3px;
-    background: var(--border-bright);
-    outline: none;
-    cursor: pointer;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    background: var(--copper);
-    cursor: pointer;
-    border: none;
-  }
-  input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: var(--copper);
-    cursor: pointer;
-    border: none;
-  }
-  .slider-val {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--copper);
-    min-width: 36px;
-    text-align: right;
-  }
-
-  /* Calc button */
-  .calc-btn {
-    width: 100%;
-    background: var(--copper-dim);
-    border: 1px solid var(--copper);
-    color: var(--bg);
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    padding: 12px;
-    cursor: pointer;
-    text-transform: uppercase;
-    margin-top: 20px;
-    transition: all 0.15s;
-  }
-  .calc-btn:hover { background: var(--copper); }
-  .calc-btn:active { transform: translateY(1px); }
-
-  /* ── OUTPUT AREA ── */
-  .output-top {
-    padding: 24px;
-    border-bottom: 1px solid var(--border);
-  }
-  .output-bottom {
-    padding: 24px;
-    overflow-y: auto;
-  }
-
-  /* Valuation bars */
-  .val-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 20px;
-  }
-  .val-title {
-    font-family: var(--mono);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    color: var(--copper-dim);
-    text-transform: uppercase;
-  }
-  .val-comps {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-  }
-  .val-comps span { color: var(--copper); }
-
-  .val-bars { display: flex; flex-direction: column; gap: 14px; }
-
-  .val-bar-row {
-    display: grid;
-    grid-template-columns: 48px 1fr 200px;
-    align-items: center;
-    gap: 14px;
-  }
-  .val-bar-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    color: var(--text-secondary);
-  }
-  .val-bar-track {
-    height: 28px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-  .val-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--copper-dim), var(--copper));
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 0%;
-  }
-  .val-bar-fill.low { background: linear-gradient(90deg, #5a4020, #8a6030); }
-  .val-bar-fill.mid { background: linear-gradient(90deg, var(--copper-dim), var(--copper)); }
-  .val-bar-fill.high { background: linear-gradient(90deg, #8a7030, var(--copper-bright)); }
-
-  .val-bar-nums {
-    text-align: right;
-  }
-  .val-ev {
-    font-family: var(--mono);
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-    display: block;
-  }
-  .val-ev.low { color: #a07040; }
-  .val-ev.mid { color: var(--copper); }
-  .val-ev.high { color: var(--copper-bright); }
-  .val-total {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-secondary);
-    display: block;
-  }
-  .val-secondary {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    display: block;
-  }
-
-  /* Warning banner */
-  .warning-banner {
-    background: rgba(201, 132, 76, 0.1);
-    border: 1px solid var(--amber);
-    border-left: 3px solid var(--amber);
-    padding: 8px 12px;
-    margin-top: 16px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--amber);
-    letter-spacing: 0.04em;
-    display: none;
-  }
-  .warning-banner.visible { display: block; }
-
-  /* China mode banner */
-  .china-banner {
-    background: rgba(201, 76, 76, 0.1);
-    border: 1px solid var(--china-red);
-    border-left: 3px solid var(--china-red);
-    padding: 8px 12px;
-    margin-bottom: 16px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--china-red);
-    letter-spacing: 0.04em;
-    display: none;
-  }
-  .china-banner.visible { display: block; }
-
-  /* China industry reference card */
-  .china-ref-card {
-    display: none;
-    margin-top: 14px;
-    padding: 10px 14px;
-    background: #111;
-    border: 1px solid var(--copper-dim);
-    border-left: 3px solid var(--copper);
-    font-family: var(--mono);
-    font-size: 9.5px;
-    color: var(--text-secondary);
-    letter-spacing: 0.03em;
-    line-height: 1.8;
-  }
-  .china-ref-card.visible { display: block; }
-  .china-ref-card .ref-title {
-    font-size: 9px;
-    color: var(--copper);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-  .china-ref-card .ref-row {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(201,168,76,0.1);
-    padding: 1px 0;
-  }
-  .china-ref-card .ref-row:last-child { border-bottom: none; }
-  .china-ref-card .ref-stage { color: var(--text-secondary); }
-  .china-ref-card .ref-range { color: var(--copper-bright); font-weight: 500; }
-  .china-ref-card .ref-note {
-    margin-top: 6px;
-    font-size: 8.5px;
-    color: var(--text-dim);
-    font-style: italic;
-  }
-
-  /* China toggle */
-  .china-toggle-row {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-    padding: 8px 10px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-  }
-  .china-toggle-row.visible { display: flex; }
-  .toggle-switch {
-    position: relative;
-    width: 36px;
-    height: 20px;
-    flex-shrink: 0;
-  }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: var(--border-bright);
-    transition: 0.2s;
-    border-radius: 20px;
-  }
-  .toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 14px;
-    width: 14px;
-    left: 3px;
-    bottom: 3px;
-    background: var(--text-dim);
-    transition: 0.2s;
-    border-radius: 50%;
-  }
-  .toggle-switch input:checked + .toggle-slider { background: var(--china-red-dim); }
-  .toggle-switch input:checked + .toggle-slider:before {
-    transform: translateX(16px);
-    background: var(--china-red);
-  }
-  .toggle-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-secondary);
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    user-select: none;
-  }
-  .toggle-label.active { color: var(--china-red); }
-
-  /* China exchange rate field */
-  .china-extra-fields {
-    display: none;
-    margin-top: 10px;
-  }
-  .china-extra-fields.visible { display: block; }
-
-  /* Placeholder state */
-  .placeholder-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    text-align: center;
-  }
-  .placeholder-icon {
-    font-family: var(--mono);
-    font-size: 36px;
-    color: var(--border-bright);
-    margin-bottom: 12px;
-  }
-  .placeholder-text {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-  }
-
-  /* ── COMPARABLES TABLE ── */
-  .comp-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 14px;
-  }
-  .comp-title {
-    font-family: var(--mono);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    color: var(--copper-dim);
-    text-transform: uppercase;
-  }
-  .comp-subtitle {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-  }
-
-  .comp-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: var(--mono);
-    font-size: 11px;
-  }
-  .comp-table th {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    padding: 6px 10px;
-    text-align: left;
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-  .comp-table td {
-    border: 1px solid var(--border);
-    padding: 7px 10px;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background 0.1s;
-  }
-  .comp-table tr:hover td { background: var(--surface-2); color: var(--text-primary); }
-  .comp-table tr.selected td { background: rgba(201,168,76,0.08); color: var(--text-primary); }
-  .comp-table tr.selected td:first-child { border-left: 2px solid var(--copper); }
-
-  .match-bar {
-    display: inline-block;
-    height: 8px;
-    background: var(--copper-dim);
-    vertical-align: middle;
-    margin-right: 4px;
-  }
-  .match-pct {
-    color: var(--copper);
-    font-weight: 600;
-  }
-
-  .td-project { color: var(--text-primary) !important; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
-  .td-ev { color: var(--copper) !important; font-weight: 600; }
-  .td-total { color: var(--text-primary) !important; }
-
-  /* Stage badge */
-  .stage-badge {
-    display: inline-block;
-    padding: 1px 5px;
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .stage-1 { background: rgba(100,100,100,0.3); color: #888; }
-  .stage-2 { background: rgba(76,175,125,0.2); color: #4caf7d; }
-  .stage-3 { background: rgba(201,168,76,0.2); color: var(--copper); }
-  .stage-4 { background: rgba(201,76,76,0.2); color: #c94c4c; }
-
-  /* Adjustment breakdown */
-  .adj-panel {
-    margin-top: 16px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    padding: 12px 14px;
-    display: none;
-  }
-  .adj-panel.visible { display: block; }
-  .adj-title {
-    font-family: var(--mono);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  .adj-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .adj-row:last-child { border-bottom: none; }
-  .adj-name { font-family: var(--mono); font-size: 10px; color: var(--text-secondary); }
-  .adj-val { font-family: var(--mono); font-size: 10px; font-weight: 600; }
-  .adj-pos { color: var(--green); }
-  .adj-neg { color: var(--red); }
-  .adj-neu { color: var(--text-dim); }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: var(--surface-1); }
-  ::-webkit-scrollbar-thumb { background: var(--border-bright); }
-  ::-webkit-scrollbar-thumb:hover { background: var(--copper-dim); }
-
-  select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 28px;
-    cursor: pointer;
-  }
-
-  .divider { height: 1px; background: var(--border); margin: 20px 0; }
-
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-  }
-  .info-key { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
-  .info-val { font-family: var(--mono); font-size: 10px; color: var(--text-secondary); }
-
-  @media (max-width: 900px) {
-    .main { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
-    .input-panel { grid-row: auto; border-right: none; border-bottom: 1px solid var(--border); }
-    .header-underline { width: 200px; }
-  }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e8e8e8;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+h1 {
+  text-align: center;
+  color: #ff6b35;
+  font-size: 32px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.subtitle {
+  text-align: center;
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+.input-section {
+  background: rgba(255,255,255,0.03);
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+.input-group {
+  margin-bottom: 20px;
+}
+label {
+  display: block;
+  color: #ff6b35;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+input, select {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,107,53,0.3);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 16px;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  background: rgba(255,255,255,0.12);
+}
+.unit-toggle {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.unit-btn {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,107,53,0.3);
+  color: #aaa;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+.unit-btn.active {
+  background: #ff6b35;
+  color: #fff;
+  border-color: #ff6b35;
+}
+.calc-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: transform 0.2s;
+}
+.calc-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+}
+.result-section {
+  background: rgba(255,255,255,0.03);
+  padding: 25px;
+  border-radius: 8px;
+  margin-top: 25px;
+  display: none;
+}
+.result-section.show {
+  display: block;
+}
+.result-title {
+  color: #ff6b35;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: rgba(255,255,255,0.05);
+  border-left: 4px solid #ff6b35;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+.result-label {
+  font-size: 14px;
+  color: #aaa;
+  text-transform: uppercase;
+}
+.result-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ff6b35;
+}
+.result-sub {
+  font-size: 12px;
+  color: #888;
+  margin-top: 5px;
+}
+.comps-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+.comps-table th {
+  background: rgba(255,107,53,0.2);
+  padding: 12px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #ff6b35;
+  border-bottom: 2px solid #ff6b35;
+}
+.comps-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: 13px;
+}
+.comps-table tr:hover {
+  background: rgba(255,255,255,0.05);
+}
 </style>
 </head>
 <body>
+<div class="container">
+  <h1>🔶 铜矿估值计算器</h1>
+  <div class="subtitle">Copper Mine Valuation Tool | 基于真实交易数据的可比估值法</div>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-left">
-    <div class="header-title"><span>COPPER</span> MINE VALUATION TOOL</div>
-    <div class="header-underline"></div>
+  <div class="input-section">
+    <div class="input-group">
+      <label>资源量 Resource Size</label>
+      <input type="number" id="resourceInput" placeholder="例如: 100" min="0" step="1">
+      <div class="unit-toggle">
+        <button class="unit-btn active" onclick="setUnit('mt')">Mt 矿石 (百万吨)</button>
+        <button class="unit-btn" onclick="setUnit('ktcu')">万吨Cu (金属量)</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>铜品位 Copper Grade (%)</label>
+      <input type="number" id="gradeInput" placeholder="例如: 0.8" min="0" max="10" step="0.1">
+    </div>
+
+    <div class="input-group">
+      <label>当前铜价 Current Copper Price (USD/lb)</label>
+      <input type="number" id="priceInput" value="4.5" min="2" max="10" step="0.1">
+    </div>
+
+    <div class="input-group">
+      <label>开发阶段 Development Stage</label>
+      <select id="stageSelect">
+        <option value="3">Reserve (储量)</option>
+        <option value="4" selected>Production (生产)</option>
+      </select>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">▶ 计算估值 Calculate</button>
   </div>
-  <div class="header-meta">
-    <div>COMPARABLE TRANSACTION METHOD</div>
-    <div>DATABASE: <span class="live">49 INTL + 33 CN TRANSACTIONS</span> &nbsp;|&nbsp; v3.0</div>
-    <div id="clock" style="margin-top:4px;"></div>
+
+  <div class="result-section" id="resultSection">
+    <div class="result-title">估值结果 Valuation Results</div>
+
+    <div class="result-row">
+      <div>
+        <div class="result-label">低值 (P25)</div>
+        <div class="result-sub" id="lowSub"></div>
+      </div>
+      <div class="result-value" id="lowValue">--</div>
+    </div>
+
+    <div class="result-row">
+      <div>
+        <div class="result-label">中值 (P50)</div>
+        <div class="result-sub" id="midSub"></div>
+      </div>
+      <div class="result-value" id="midValue">--</div>
+    </div>
+
+    <div class="result-row">
+      <div>
+        <div class="result-label">高值 (P75)</div>
+        <div class="result-sub" id="highSub"></div>
+      </div>
+      <div class="result-value" id="highValue">--</div>
+    </div>
+
+    <div class="result-title" style="margin-top:30px;">可比交易 Comparable Transactions</div>
+    <table class="comps-table" id="compsTable">
+      <thead>
+        <tr>
+          <th>项目 Project</th>
+          <th>年份</th>
+          <th>资源量 Mt</th>
+          <th>品位 %</th>
+          <th>金属量 kt</th>
+          <th>EV/lb</th>
+        </tr>
+      </thead>
+      <tbody id="compsBody"></tbody>
+    </table>
   </div>
 </div>
 
-<!-- MAIN LAYOUT -->
-<div class="main">
-
-  <!-- INPUT PANEL -->
-  <div class="input-panel">
-    <div class="section-label">REQUIRED PARAMETERS</div>
-
-    <!-- Resource Size -->
-    <div class="field-group">
-      <label class="field-label">RESOURCE SIZE</label>
-      <div class="input-row">
-        <input type="number" id="resourceInput" value="" placeholder="e.g. 5.0" min="0" step="0.1" style="flex:1;">
-        <div class="unit-toggle">
-          <button class="unit-btn active" id="btnMoz" onclick="setUnit('moz')">Moz</button>
-          <button class="unit-btn" id="btnTons" onclick="setUnit('tons')">t Au</button>
-        </div>
-      </div>
-      <div style="margin-top:5px; font-family:var(--mono); font-size:10px; color:var(--text-dim);" id="unitConvert">&nbsp;</div>
-    </div>
-
-    <!-- Development Stage (international mode) -->
-    <div class="field-group" id="intlStageGroup">
-      <label class="field-label">DEVELOPMENT STAGE</label>
-      <div class="radio-group">
-        <button class="radio-btn" id="stageResource" onclick="setStage(2)">RESOURCE</button>
-        <button class="radio-btn" id="stageReserve" onclick="setStage(3)">RESERVE</button>
-        <button class="radio-btn active" id="stageProduction" onclick="setStage(4)">PRODUCTION</button>
-      </div>
-    </div>
-
-    <!-- Copper Price -->
-    <div class="field-group">
-      <label class="field-label" id="goldPriceLabel">CURRENT COPPER PRICE (USD/oz)</label>
-      <div class="input-row">
-        <input type="number" id="goldPrice" value="3300" min="500" max="10000" step="10" class="full">
-      </div>
-    </div>
-
-    <!-- COLLAPSIBLE: Refine Estimate -->
-    <div class="collapsible-header" onclick="toggleRefine()">
-      <div class="section-label" style="margin:0; border:none; padding:0;">REFINE ESTIMATE</div>
-      <div class="collapsible-arrow" id="refineArrow">&#9654;</div>
-    </div>
-    <div class="collapsible-body" id="refineBody">
-
-      <div class="field-group" style="margin-top:12px;">
-        <label class="field-label">GRADE (g/t Au)</label>
-        <input type="number" id="grade" placeholder="e.g. 2.5" min="0" step="0.1" class="full">
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">AISC (USD/oz)</label>
-        <input type="number" id="aisc" placeholder="e.g. 1050" min="0" step="10" class="full">
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">MINING METHOD</label>
-        <div class="radio-group">
-          <button class="radio-btn" id="methodOP" onclick="setMethod(0)">OPEN PIT</button>
-          <button class="radio-btn" id="methodUG" onclick="setMethod(1)">UNDERGROUND</button>
-          <button class="radio-btn" id="methodMix" onclick="setMethod(2)">MIXED</button>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">INFRASTRUCTURE</label>
-        <div class="radio-group">
-          <button class="radio-btn" id="infraGreen" onclick="setInfra(0)">GREENFIELD</button>
-          <button class="radio-btn" id="infraBrown" onclick="setInfra(1)">BROWNFIELD</button>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">COUNTRY / REGION</label>
-        <select id="country" class="full" onchange="onCountryChange()">
-          <option value="">-- Not specified --</option>
-          <option value="canada">Canada</option>
-          <option value="australia">Australia</option>
-          <option value="africa">Africa</option>
-          <option value="south_america">South America</option>
-          <option value="usa">USA</option>
-          <option value="china">China (Domestic)</option>
-          <option value="other">Other</option>
-        </select>
-
-        <!-- China mode toggle — shown only when China is selected -->
-        <div class="china-toggle-row" id="chinaToggleRow">
-          <label class="toggle-switch">
-            <input type="checkbox" id="chinaToggle" onchange="onChinaToggle()">
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-label" id="chinaToggleLabel">&#x5207;&#x6362; &#x4F7F;&#x7528;&#x4E2D;&#x56FD;&#x5B9A;&#x4EF7;&#x903B;&#x8F91; (&#x5143;/&#x514B;)</span>
-        </div>
-
-        <!-- China extra fields -->
-        <div class="china-extra-fields" id="chinaExtraFields">
-          <div class="field-group" style="margin-top:10px; margin-bottom:10px;">
-            <label class="field-label">&#x6C47;&#x7387; (CNY/USD)</label>
-            <input type="number" id="exchangeRate" value="7.25" min="1" max="20" step="0.01" class="full">
-          </div>
-          <div class="field-group" style="margin-bottom:10px;">
-            <label class="field-label">&#x8D44;&#x6E90;&#x7C7B;&#x522B; (RESOURCE CLASSIFICATION)</label>
-            <div class="radio-group">
-              <button class="radio-btn" id="rc333" onclick="setChinaResourceClass(1)">333&#x7C7B;</button>
-              <button class="radio-btn" id="rc332" onclick="setChinaResourceClass(2)">332&#x7C7B;</button>
-              <button class="radio-btn" id="rc331" onclick="setChinaResourceClass(3)">331&#x7C7B;</button>
-              <button class="radio-btn active" id="rc4" onclick="setChinaResourceClass(4)">&#x91C7;&#x77FF;&#x6743;</button>
-            </div>
-            <div style="margin-top:4px;font-family:var(--mono);font-size:9px;color:var(--text-dim);line-height:1.5;" id="rcHint">
-              &#x91C7;&#x77FF;&#x6743; (&#x5728;&#x4EA7;&#x77FF;&#x5C71;)
-            </div>
-          </div>
-          <div class="field-group" style="margin-bottom:0;">
-            <label class="field-label">&#x77FF;&#x6743;&#x7C7B;&#x578B; (LICENSE TYPE)</label>
-            <div class="radio-group">
-              <button class="radio-btn" id="lt1" onclick="setChinaLicenseType(1)">&#x63A2;&#x77FF;&#x6743;</button>
-              <button class="radio-btn active" id="lt2" onclick="setChinaLicenseType(2)">&#x91C7;&#x77FF;&#x6743;</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">MINE LIFE (YEARS)</label>
-        <input type="number" id="mineLife" placeholder="e.g. 15" min="1" max="50" step="1" class="full">
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">M&amp;I RATIO (%)</label>
-        <div class="slider-row">
-          <input type="range" id="miRatio" min="0" max="100" value="50" oninput="document.getElementById('miVal').textContent=this.value+'%'">
-          <span class="slider-val" id="miVal">50%</span>
-        </div>
-      </div>
-
-    </div><!-- end refineBody -->
-
-    <button class="calc-btn" onclick="calculate()">&#9654; &nbsp;CALCULATE VALUATION</button>
-
-    <div class="divider"></div>
-    <div class="section-label">METHODOLOGY</div>
-    <div class="info-row"><span class="info-key">Method</span><span class="info-val">Comparable Transactions</span></div>
-    <div class="info-row"><span class="info-key">Adjustment</span><span class="info-val">Copper-price normalized</span></div>
-    <div class="info-row"><span class="info-key">Output</span><span class="info-val">P25 / P50 / P75</span></div>
-    <div class="info-row"><span class="info-key">Intl DB</span><span class="info-val">2010&#x2013;2025 M&amp;A deals</span></div>
-    <div class="info-row"><span class="info-key">China DB</span><span class="info-val">333/332/331/&#x91C7;&#x77FF;&#x6743; &#x56DB;&#x7C7B;&#x53C2;&#x8003;&#x4EF7;</span></div>
-    <div style="margin-top:10px; font-family:var(--mono); font-size:9px; color:var(--text-dim); line-height:1.6;">
-      EV/oz values are normalized to current gold price. Small deposits (&lt;1 Moz) use stage median with liquidity discount. Results are indicative only and do not constitute investment advice.
-    </div>
-
-  </div><!-- end input-panel -->
-
-  <!-- OUTPUT TOP: Valuation Bars -->
-  <div class="output-top">
-    <div class="val-header">
-      <div class="val-title" id="valTitle">ENTERPRISE VALUE ESTIMATE</div>
-      <div class="val-comps" id="compCount">Enter parameters and calculate</div>
-    </div>
-
-    <!-- China mode banner -->
-    <div class="china-banner" id="chinaBanner">
-      &#x4E2D;&#x56FD;&#x9879;&#x76EE;&#x6A21;&#x5F0F; &#x2014; &#x57FA;&#x4E8E;&#x56FD;&#x5185;&#x77FF;&#x6743;&#x4EA4;&#x6613;&#x53C2;&#x8003;&#x4EF7; | &#x6570;&#x636E;&#x6765;&#x6E90;&#xFF1A;&#x884C;&#x4E1A;&#x53C2;&#x8003;&#x533A;&#x95F4;&#xFF08;&#x975E;&#x5B8C;&#x6574;&#x516C;&#x5F00;&#x6570;&#x636E;&#xFF09;
-    </div>
-
-    <div id="placeholderState" class="placeholder-state">
-      <div class="placeholder-icon">&#x25C8;</div>
-      <div class="placeholder-text">AWAITING INPUT<br><br>Configure parameters on the left<br>and press CALCULATE</div>
-    </div>
-
-    <div id="valuationResult" style="display:none;">
-      <div class="val-bars">
-        <div class="val-bar-row">
-          <div class="val-bar-label">LOW<br><span style="font-size:8px;color:var(--text-dim)">P25</span></div>
-          <div class="val-bar-track"><div class="val-bar-fill low" id="barLow"></div></div>
-          <div class="val-bar-nums">
-            <span class="val-ev low" id="evLow">&#x2014;</span>
-            <span class="val-total" id="totalLow">&#x2014;</span>
-            <span class="val-secondary" id="secLow"></span>
-          </div>
-        </div>
-        <div class="val-bar-row">
-          <div class="val-bar-label">MID<br><span style="font-size:8px;color:var(--text-dim)">P50</span></div>
-          <div class="val-bar-track"><div class="val-bar-fill mid" id="barMid"></div></div>
-          <div class="val-bar-nums">
-            <span class="val-ev mid" id="evMid">&#x2014;</span>
-            <span class="val-total" id="totalMid">&#x2014;</span>
-            <span class="val-secondary" id="secMid"></span>
-          </div>
-        </div>
-        <div class="val-bar-row">
-          <div class="val-bar-label">HIGH<br><span style="font-size:8px;color:var(--text-dim)">P75</span></div>
-          <div class="val-bar-track"><div class="val-bar-fill high" id="barHigh"></div></div>
-          <div class="val-bar-nums">
-            <span class="val-ev high" id="evHigh">&#x2014;</span>
-            <span class="val-total" id="totalHigh">&#x2014;</span>
-            <span class="val-secondary" id="secHigh"></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="warning-banner" id="extrapolatedWarning">
-        &#9651; EXTRAPOLATED &#x2014; Resource &lt;1 Moz: limited comparable data. Liquidity discount applied. Treat with caution.
-      </div>
-
-      <div class="china-ref-card" id="chinaRefCard">
-        <div class="ref-title">&#x8D44;&#x6E90;&#x7C7B;&#x522B;&#x53C2;&#x8003;&#x4EF7;&#xFF08;&#x5143;/&#x514B;&#xFF0C;2024&#x5E74;&#x91D1;&#x4EF7;&#x6C34;&#x5E73;&#xFF09;</div>
-        <div class="ref-row"><span class="ref-stage">333&#x7C7B; &#x63A8;&#x65AD;&#x8D44;&#x6E90;&#x91CF;</span><span class="ref-range">6 &#x2013; 16 &#x5143;/&#x514B;</span></div>
-        <div class="ref-row"><span class="ref-stage">332&#x7C7B; &#x63A7;&#x5236;&#x8D44;&#x6E90;&#x91CF;</span><span class="ref-range">15 &#x2013; 31 &#x5143;/&#x514B;</span></div>
-        <div class="ref-row"><span class="ref-stage">331&#x7C7B; &#x63A2;&#x660E;&#x8D44;&#x6E90;&#x91CF;</span><span class="ref-range">31 &#x2013; 60 &#x5143;/&#x514B;</span></div>
-        <div class="ref-row"><span class="ref-stage">&#x91C7;&#x77FF;&#x6743; &#x5728;&#x4EA7;&#x77FF;&#x5C71;</span><span class="ref-range">59 &#x2013; 110 &#x5143;/&#x514B;</span></div>
-        <div class="ref-note">&#x6EA2;&#x4EF7;&#xFF1A;&#x5C71;&#x4E1C;/&#x6CB3;&#x5357;&#x9AD8;&#x54C1;&#x4F4D; +50&#x2013;100% &nbsp;|&nbsp; &#x6298;&#x4EF7;&#xFF1A;&#x897F;&#x90E8;&#x504F;&#x8FDC;/&#x4F4E;&#x54C1;&#x4F4D; &#x2212;30&#x2013;50%<br>&#x6CE8;&#xFF1A;2024&#x5E74;&#x91D1;&#x4EF7;&#x8F83;2022&#x5E74;&#x4E0A;&#x6DA8;~60%&#xFF0C;&#x4EF7;&#x683C;&#x5DF2;&#x76F8;&#x5E94;&#x4E0A;&#x8C03;</div>
-      </div>
-      <div class="china-ref-card" id="chinaOverseasCard" style="margin-top:10px;border-color:var(--copper-dim);border-left-color:var(--copper-dim);">
-        <div class="ref-title" style="color:var(--copper-dim);">&#x4E2D;&#x56FD;&#x4E70;&#x5BB6;&#x6D77;&#x5916;&#x6536;&#x8D2D;&#x53C2;&#x8003;&#xFF08;&#x5DF2;&#x9A8C;&#x8BC1;&#xFF0C;7&#x7B14;&#xFF09;</div>
-        <div class="ref-row"><span class="ref-stage">&#x5F00;&#x53D1;&#x9636;&#x6BB5;&#xFF08;DFS&#x5B8C;&#x6210;&#xFF09;</span><span class="ref-range" style="color:var(--text-secondary);">22 &#x2013; 61 &#x5143;/&#x514B;</span></div>
-        <div class="ref-row"><span class="ref-stage">&#x4F4E;&#x54C1;&#x4F4D;&#x751F;&#x4EA7;&#x77FF;&#x5C71;</span><span class="ref-range" style="color:var(--text-secondary);">44 &#x2013; 99 &#x5143;/&#x514B;</span></div>
-        <div class="ref-row"><span class="ref-stage">&#x9AD8;&#x54C1;&#x4F4D;&#x751F;&#x4EA7;&#x77FF;&#x5C71;</span><span class="ref-range" style="color:var(--text-secondary);">130 &#x2013; 205 &#x5143;/&#x514B;</span></div>
-        <div class="ref-note">&#x89C4;&#x5F8B;&#xFF1A;&#x4E2D;&#x56FD;&#x4E70;&#x5BB6;&#x5B9A;&#x4EF7;&#x4E0E;&#x56FD;&#x9645;&#x5E02;&#x573A;&#x4E00;&#x81F4;<br>&#x56FD;&#x5185;&#x77FF;&#x6743;&#x901A;&#x5E38;&#x6EA2;&#x4EF7;30&#x2013;80%&#xFF08;&#x7A00;&#x7F3A;&#x6027;+&#x653F;&#x7B56;&#x4FDD;&#x62A4;&#xFF09;</div>
-      </div>
-
-      <div class="adj-panel" id="adjPanel">
-        <div class="adj-title">APPLIED ADJUSTMENTS</div>
-        <div id="adjRows"></div>
-      </div>
-    </div>
-  </div><!-- end output-top -->
-
-  <!-- OUTPUT BOTTOM: Comparables Table -->
-  <div class="output-bottom">
-    <div class="comp-header">
-      <div class="comp-title" id="compTitle">COMPARABLE TRANSACTIONS</div>
-      <div class="comp-subtitle" id="compSubtitle">Top 5 by similarity score</div>
-    </div>
-    <div id="compTableContainer">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:20px 0;">
-        No comparables loaded. Run calculation to populate.
-      </div>
-    </div>
-  </div><!-- end output-bottom -->
-
-</div><!-- end main -->
-
 <script>
-// ── STATE ──
-let currentUnit = 'moz';
-let currentStage = 4;
-let currentMethod = null;
-let currentInfra = null;
-let selectedRow = null;
-let chinaMode = false;
-let chinaResourceClass = 4;  // 1=333类, 2=332类, 3=331类, 4=采矿权
-let chinaLicenseType = 2;    // 1=探矿权, 2=采矿权
 
-// ── INTERNATIONAL TRANSACTION DATABASE ──
-// [resource_moz, ev_per_oz, stage, gold_price_at_deal, grade_gt, aisc, mining_method, infra, country, note]
-// stage: 2=resource, 3=reserve, 4=production
-// method: 0=open_pit, 1=underground, 2=mixed
-// infra: 0=greenfield, 1=brownfield
-const TRANSACTIONS = [
-  [1.36, 296, 2, 1650, 7.4,  900,  1, 0, 'south_america', 'Yamana/Extorre Cerro Moro'],
-  [2.0,  220, 2, 1160, 5.39, 950,  1, 0, 'canada',        'Coppercorp/Probe Borden'],
-  [2.0,  195, 4, 1650, 2.5,  950,  0, 1, 'africa',        'Endeavour/Avion Mali'],
-  [2.5,  148, 2, 1200, 7.9,  900,  1, 0, 'canada',        'Agnico/Comaplex Meliadine'],
-  [3.0,   55, 2, 1250, 4.2,  950,  1, 0, 'canada',        'Primero/Brigus Black Fox'],
-  [3.5,   49, 2, 3500, 1.6,  1100, 0, 0, 'africa',        'Montage/African Copper'],
-  [3.5,   64, 2, 1650, 1.8,  1050, 0, 1, 'australia',     'Shandong/Focus Minerals'],
-  [4.0,   90, 4, 3500, 3.5,  1200, 1, 1, 'australia',     'Alkane/Mandalay'],
-  [4.0,   60, 2, 1250, 1.6,  950,  0, 0, 'africa',        'B2Copper/Papillon Fekola'],
-  [4.0,   75, 2, 1400, 5.5,  950,  1, 0, 'canada',        'Newmont/GT Copper'],
-  [4.5,   70, 3, 1400, 3.8,  950,  1, 1, 'australia',     'Newcrest/Telfer'],
-  [5.0,   30, 1, 3500, 0.85, 1400, 0, 0, 'canada',        'Coffee Copper Yukon'],
-  [5.0,  105, 4, 3500, 0.97, 1050, 0, 1, 'canada',        'Franco-Nevada/Cote'],
-  [5.1,   43, 2, 1700, 1.13, 950,  0, 0, 'africa',        'Shandong/Cardinal Namdini'],
-  [5.2,   78, 2, 1250, 1.38, 1050, 0, 0, 'canada',        'Coppercorp/Kaminak Coffee'],
-  [5.5,   88, 3, 1400, 1.1,  1050, 0, 1, 'australia',     'Saracen/KCGM 50%'],
-  [6.0,   65, 2, 1400, 0.97, 1050, 0, 0, 'canada',        'IAMCOPPER/Trelawney Cote'],
-  [6.0,   72, 4, 1250, 1.5,  1100, 0, 1, 'australia',     'Evolution/Cowal'],
-  [6.5,  126, 4, 1160, 0.6,  1000, 0, 1, 'usa',           'Newmont/CC&V'],
-  [6.9,   34, 4, 1700, 2.1,  950,  0, 1, 'south_america', 'Zijin/Guyana Copperfields'],
-  [7.9,   38, 4, 1400, 3.5,  900,  1, 1, 'australia',     'Copper Fields/Barrick Yilgarn'],
-  [8.0,   76, 4, 1160, 0.7,  1050, 0, 1, 'usa',           'Kinross/Bald Mtn'],
-  [8.0,  120, 4, 1250, 8.8,  900,  1, 1, 'canada',        'Newcrest/Red Chris 30%'],
-  [8.5,   65, 2, 1250, 1.2,  1100, 0, 0, 'canada',        'Coppercorp/Probe Metals'],
-  [9.0,  107, 4, 1250, 0.8,  1000, 0, 1, 'south_america', 'Shandong/Veladero 50%'],
-  [10.0, 105, 4, 3500, 0.97, 1050, 0, 1, 'canada',        'Franco-Nevada/Cote'],
-  [10.0, 140, 2, 1800, 4.5,  900,  1, 0, 'canada',        'Kinross/Great Bear'],
-  [10.0,  30, 4, 1160, 3.5,  900,  2, 1, 'other',         'Zijin/Porgera 50%'],
-  [10.5, 133, 4, 2300, 8.5,  750,  1, 1, 'south_america', 'Zijin/Buritica'],
-  [11.0,  91, 3, 1700, 8.5,  750,  1, 0, 'south_america', 'Zijin/Continental'],
-  [12.0, 125, 4, 4300, 0.95, 1580, 2, 1, 'canada',        'Coeur/New Copper'],
-  [12.0, 142, 4, 1800, 1.2,  900,  1, 1, 'other',         'SSR/Alacer Turkey'],
-  [15.0, 133, 3, 2300, 8.1,  850,  1, 0, 'canada',        'Copper Fields/Windfall'],
-  [15.0, 100, 4, 1950, 1.5,  1200, 2, 1, 'canada',        'Agnico/Yamana'],
-  [15.0,  67, 4, 1950, 1.8,  1150, 0, 1, 'south_america', 'Pan American/Yamana LatAm'],
-  [15.0,  80, 4, 1250, 2.5,  900,  1, 1, 'africa',        'Barrick/Acacia Tanzania'],
-  [18.0, 156, 4, 1800, 13.5, 950,  1, 1, 'canada',        'Newcrest/Brucejack'],
-  [18.0,  75, 4, 1250, 1.1,  1050, 2, 1, 'canada',        'Agnico+Yamana/Osisko'],
-  [20.0, 140, 4, 1800, 2.8,  1150, 2, 1, 'australia',     'Northern Star/Saracen'],
-  [4.0,   60, 3, 1250, 1.6,  950,  0, 0, 'africa',        'B2Copper/Fekola Reserve'],
-  // Chinese company overseas acquisitions (verified, high confidence)
-  [1.75, 571, 4, 2300, 3.36, 900, 0, 1, 'africa', 'Zijin/Newmont Akyem Ghana 2024'],
-  [3.45, 138, 4, 2300, 1.3, 950, 0, 1, 'africa', 'Zhaojin/Tietto Abujar CIV 2024'],
-  [3.45, 79, 3, 2300, 0.9, 1000, 0, 0, 'africa', 'Shanjin/Osino Twin Hills Namibia 2024'],
-  [11.2, 359, 4, 2700, 2.5, 950, 2, 1, 'africa', 'Zijin/Allied Copper Africa 2026'],
-  [4.7, 32, 4, 1700, 8.0, 900, 1, 1, 'canada', 'Shandong/TMAC Hope Bay 2020 (distressed)'],
-  [4.5, 23, 4, 1700, 2.5, 950, 1, 0, 'africa', 'Asante/Bibiani Ghana 2021 (distressed)'],
-  // Chinese acquirer overseas deals (2017-2026, verified with sources)
-  [197.4, 44, 4, 2300, 1.0, 900, 0, 1, 'other', 'Zijin/RG Copper Kazakhstan 2025'],
-  [533.0, 56, 4, 4500, 1.48, 950, 0, 1, 'africa', 'Zijin/Allied Copper Africa 2026'],
-  [90.3, 22, 3, 2300, 1.08, 1000, 0, 0, 'africa', 'Shanjin/Osino Twin Hills Namibia 2024'],
+const copperDeals = [
+  // [resource_mt_ore, cu_grade_pct, cu_metal_kt, ev_usd_m, ev_per_lb_cu, stage, year, country, deposit_type, project_name]
+  [1650, 1.2, 1980, 6400, 0.73, 4, 2023, 'Australia', 'IOCG + Porphyry', 'OZ Minerals Portfolio (BHP)'],
+  [4200, 0.35, 1470, 19100, 2.95, 4, 2023, 'Australia', 'Porphyry Cu-Au', 'Newcrest/Cadia (Newmont)'],
+  [3500, 0.51, 1785, 3300, 0.42, 4, 2022, 'Mongolia', 'Porphyry Cu-Au', 'Turquoise Hill/Oyu Tolgoi (Rio Tinto)'],
+  [45, 2.8, 126, 1870, 3.37, 4, 2022, 'Spain', 'VMS Cu-Zn', 'MATSA (Sandfire)'],
+  [380, 0.28, 106, 439, 0.94, 4, 2021, 'Canada', 'Porphyry Cu', 'Copper Mountain (Hudbay)'],
+  [1100, 0.48, 528, 1200, 0.52, 3, 2018, 'Chile', 'Porphyry Cu', 'Quebrada Blanca 30% (Sumitomo)'],
+  [800, 2.5, 2000, 960, 0.11, 4, 2016, 'DRC', 'Sediment Cu-Co', 'Katanga+Mutanda (Glencore)'],
+  [450, 0.45, 202, 1030, 1.16, 4, 2015, 'Chile', 'Porphyry Cu', 'Zaldívar 50% (Antofagasta)'],
+  [2200, 0.73, 1606, 5850, 0.83, 3, 2014, 'Peru', 'Porphyry Cu-Mo', 'Las Bambas (MMG)'],
+  [1800, 0.38, 684, 4160, 1.38, 3, 2014, 'Chile', 'Porphyry Cu-Mo', 'Sierra Gorda (KGHM)'],
 ];
 
-// ── CHINA TRANSACTION DATABASE ──
-// [resource_tons_au, yuan_per_gram, resource_class, gold_price_cny, grade_gt, province, note]
-// resource_class: 1=333类(推断), 2=332类(控制), 3=331类(探明), 4=采矿权(在产)
-// yuan_per_gram = EV / resource_grams, based on NPV method (ref gold 680 CNY/g, 2024-2025)
-// 采矿权: buyer pays 50-70% NPV; 331: 25-40%; 332: 12-22%; 333: 5-12%
-// NPV/g: premium mine 157, normal mine 142, remote mine 123 (AISC 220/300/380, recovery 88%, tax 25%, discount 12%)
-const CHINA_TRANSACTIONS = [
-  // === 采矿权 in-production (resource_class=4) ===
-  [80.0,  110, 4, 680, 3.5, `shandong`,       `\u5c71\u4e1c\u5927\u578b\u5728\u4ea7\u77ff\u5c71\uff08\u7126\u5bb6\u578b\uff0c\u7a00\u7f3a\u6ea2\u4ef7\uff09`],
-  [40.0,  102, 4, 680, 4.2, `shandong`,       `\u5c71\u4e1c\u4e2d\u5927\u578b\u5728\u4ea7\u77ff\u5c71`],
-  [20.0,   94, 4, 680, 6.0, `henan`,          `\u6cb3\u5357\u9ad8\u54c1\u4f4d\u5728\u4ea7\u77ff\u5c71`],
-  [15.0,   88, 4, 680, 4.8, `guizhou`,        `\u8d35\u5dde\u5361\u6797\u578b\u5728\u4ea7\u77ff\u5c71`],
-  [10.0,   85, 4, 680, 5.5, `hunan`,          `\u6e56\u5357\u6e58\u897f\u5728\u4ea7\u77ff\u5c71`],
-  [8.0,    82, 4, 680, 3.8, `yunnan`,         `\u4e91\u5357\u5728\u4ea7\u77ff\u5c71`],
-  [6.0,    78, 4, 680, 3.5, `inner_mongolia`, `\u5185\u8499\u53e4\u5728\u4ea7\u77ff\u5c71`],
-  [5.0,    82, 4, 680, 4.5, `shandong`,       `\u5c71\u4e1c\u5c0f\u578b\u9ad8\u54c1\u4f4d\u5728\u4ea7\u77ff\u5c71`],
-  [5.0,    68, 4, 680, 2.8, `other`,          `\u4e2d\u897f\u90e8\u5728\u4ea7\u77ff\u5c71\uff08\u54c1\u4f4d\u504f\u4f4e\uff09`],
-  [3.0,    74, 4, 680, 3.2, `henan`,          `\u6cb3\u5357\u5c0f\u578b\u5728\u4ea7\u77ff\u5c71`],
-  [3.0,    64, 4, 680, 2.5, `other`,          `\u897f\u90e8\u7701\u4efd\u5728\u4ea7\u77ff\u5c71\uff08\u57fa\u5efa\u6298\u6263\uff09`],
-  [2.0,    71, 4, 680, 3.0, `fujian`,         `\u798f\u5efa\u5728\u4ea7\u77ff\u5c71\u53c2\u8003`],
-  [1.0,    71, 4, 680, 3.0, `shandong`,       `\u5c71\u4e1c\u5c0f\u578b\u5728\u4ea7\u77ff\u5c71`],
-  [1.0,    61, 4, 680, 2.2, `other`,          `\u4e2d\u897f\u90e8\u5c0f\u578b\u5728\u4ea7\u77ff\u5c71`],
-  [0.5,    71, 4, 680, 2.8, `henan`,          `\u6cb3\u5357\u5c0f\u578b\u5728\u4ea7\u77ff\u5c71`],
-  [0.3,    59, 4, 680, 2.0, `other`,          `\u897f\u90e8\u5c0f\u578b\u5728\u4ea7\u77ff\u5c71`],
 
-  // === 331类 探明资源量 (resource_class=3) ===
-  [10.0,   60, 3, 680, 4.0, `shandong`,  `\u5c71\u4e1c331\u7c7b\u63a2\u660e\u8d44\u6e90\u91cf`],
-  [6.0,    55, 3, 680, 3.5, `henan`,     `\u6cb3\u5357331\u7c7b\u63a2\u660e\u8d44\u6e90\u91cf`],
-  [5.0,    56, 3, 680, 3.8, `shandong`,  `\u5c71\u4e1c\u4e2d\u578b331\u7c7b`],
-  [3.0,    50, 3, 680, 3.0, `yunnan`,    `\u4e91\u5357331\u7c7b`],
-  [2.0,    45, 3, 680, 2.8, `guizhou`,   `\u8d35\u5dde331\u7c7b`],
-  [1.5,    43, 3, 680, 2.5, `other`,     `\u4e2d\u90e8\u7701\u4efd331\u7c7b`],
-  [1.0,    40, 3, 680, 2.3, `other`,     `\u897f\u90e8\u7701\u4efd331\u7c7b`],
-  [0.5,    37, 3, 680, 2.0, `other`,     `\u5c0f\u578b331\u7c7b`],
-  [0.3,    31, 3, 680, 1.8, `other`,     `\u5c0f\u578b331\u7c7b\uff08\u504f\u8fdc\uff09`],
+let currentUnit = 'mt';
 
-  // === 332类 控制资源量 (resource_class=2) ===
-  [5.0,    31, 2, 680, 3.0, `shandong`,  `\u5c71\u4e1c332\u7c7b\u63a7\u5236\u8d44\u6e90\u91cf`],
-  [3.0,    28, 2, 680, 2.5, `henan`,     `\u6cb3\u5357332\u7c7b`],
-  [2.0,    26, 2, 680, 2.2, `yunnan`,    `\u4e91\u5357332\u7c7b`],
-  [1.0,    23, 2, 680, 2.0, `other`,     `\u4e2d\u90e8\u7701\u4efd332\u7c7b`],
-  [0.5,    20, 2, 680, 1.8, `other`,     `\u897f\u90e8\u7701\u4efd332\u7c7b`],
-  [0.3,    17, 2, 680, 1.6, `other`,     `\u5c0f\u578b332\u7c7b`],
-  [0.1,    15, 2, 680, 1.4, `other`,     `\u5c0f\u578b332\u7c7b\uff08\u504f\u8fdc\uff09`],
-
-  // === 333类 推断资源量 (resource_class=1) ===
-  [3.0,    16, 1, 680, 2.5, `shandong`,  `\u5c71\u4e1c333\u7c7b\u63a8\u65ad\u8d44\u6e90\u91cf`],
-  [2.0,    14, 1, 680, 2.2, `henan`,     `\u6cb3\u5357333\u7c7b`],
-  [1.0,    11, 1, 680, 2.0, `other`,     `\u4e2d\u90e8\u7701\u4efd333\u7c7b`],
-  [0.5,    10, 1, 680, 1.8, `other`,     `\u897f\u90e8\u7701\u4efd333\u7c7b`],
-  [0.3,     9, 1, 680, 1.6, `other`,     `\u5c0f\u578b333\u7c7b`],
-  [0.1,     6, 1, 680, 1.4, `other`,     `\u5c0f\u578b333\u7c7b\uff08\u504f\u8fdc\uff09`],
-];
-
-const STAGE_NAMES = { 1: 'Early', 2: 'Resource', 3: 'Reserve', 4: 'Production' };
-const STAGE_NAMES_CN = { 1: '333\u7c7b', 2: '332\u7c7b', 3: '331\u7c7b', 4: '\u91c7\u77ff\u6743' };
-const RC_HINTS = { 1: '333\u7c7b (\u63a8\u65ad\u8d44\u6e90\u91cf)', 2: '332\u7c7b (\u63a7\u5236\u8d44\u6e90\u91cf)', 3: '331\u7c7b (\u63a2\u660e\u8d44\u6e90\u91cf)', 4: '\u91c7\u77ff\u6743 (\u5728\u4ea7\u77ff\u5c71)' };
-const METHOD_NAMES = { 0: 'Open Pit', 1: 'Underground', 2: 'Mixed' };
-const INFRA_NAMES = { 0: 'Greenfield', 1: 'Brownfield' };
-
-// ── CHINA MODE UI HANDLERS ──
-function onCountryChange() {
-  const val = document.getElementById('country').value;
-  const toggleRow = document.getElementById('chinaToggleRow');
-  if (val === 'china') {
-    toggleRow.classList.add('visible');
-  } else {
-    toggleRow.classList.remove('visible');
-    // Turn off china mode if country changes away
-    document.getElementById('chinaToggle').checked = false;
-    onChinaToggle();
-  }
+function setUnit(unit) {
+  currentUnit = unit;
+  document.querySelectorAll('.unit-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
 }
 
-function onChinaToggle() {
-  chinaMode = document.getElementById('chinaToggle').checked;
-  const label = document.getElementById('chinaToggleLabel');
-  const extraFields = document.getElementById('chinaExtraFields');
-  const banner = document.getElementById('chinaBanner');
-  const goldLabel = document.getElementById('goldPriceLabel');
-  const intlStageGroup = document.getElementById('intlStageGroup');
-
-  if (chinaMode) {
-    label.classList.add('active');
-    extraFields.classList.add('visible');
-    banner.classList.add('visible');
-    intlStageGroup.style.display = 'none';
-    goldLabel.textContent = 'CURRENT COPPER PRICE (CNY/g)';
-    document.getElementById('goldPrice').value = 680;
-    document.getElementById('valTitle').textContent = '\u4f01\u4e1a\u4ef7\u503c\u4f30\u7b97 (\u4e2d\u56fd\u6a21\u5f0f)';
-    document.getElementById('compTitle').textContent = '\u56fd\u5185\u53ef\u6bd4\u4ea4\u6613';
-  } else {
-    label.classList.remove('active');
-    extraFields.classList.remove('visible');
-    banner.classList.remove('visible');
-    intlStageGroup.style.display = 'block';
-    goldLabel.textContent = 'CURRENT COPPER PRICE (USD/oz)';
-    document.getElementById('goldPrice').value = 3300;
-    document.getElementById('valTitle').textContent = 'ENTERPRISE VALUE ESTIMATE';
-    document.getElementById('compTitle').textContent = 'COMPARABLE TRANSACTIONS';
-  }
-}
-
-// ── CHINA RESOURCE CLASS & LICENSE TYPE HANDLERS ──
-function setChinaResourceClass(rc) {
-  chinaResourceClass = rc;
-  document.getElementById('rc333').classList.toggle('active', rc === 1);
-  document.getElementById('rc332').classList.toggle('active', rc === 2);
-  document.getElementById('rc331').classList.toggle('active', rc === 3);
-  document.getElementById('rc4').classList.toggle('active', rc === 4);
-  const hint = document.getElementById('rcHint');
-  if (hint) hint.textContent = RC_HINTS[rc] || '';
-  // Auto-sync license type: 采矿权 resource class → 采矿权 license; others → 探矿权
-  if (rc === 4) {
-    setChinaLicenseType(2);
-  } else {
-    setChinaLicenseType(1);
-  }
-}
-
-function setChinaLicenseType(lt) {
-  chinaLicenseType = lt;
-  document.getElementById('lt1').classList.toggle('active', lt === 1);
-  document.getElementById('lt2').classList.toggle('active', lt === 2);
-}
-
-// ── UI HELPERS ──
-function setUnit(u) {
-  currentUnit = u;
-  document.getElementById('btnMoz').classList.toggle('active', u === 'moz');
-  document.getElementById('btnTons').classList.toggle('active', u === 'tons');
-  updateConvert();
-}
-
-function setStage(s) {
-  currentStage = s;
-  ['stageResource','stageReserve','stageProduction'].forEach((id,i) => {
-    document.getElementById(id).classList.toggle('active', [2,3,4][i] === s);
-  });
-}
-
-function setMethod(m) {
-  currentMethod = m;
-  ['methodOP','methodUG','methodMix'].forEach((id,i) => {
-    document.getElementById(id).classList.toggle('active', i === m);
-  });
-}
-
-function setInfra(v) {
-  currentInfra = v;
-  document.getElementById('infraGreen').classList.toggle('active', v === 0);
-  document.getElementById('infraBrown').classList.toggle('active', v === 1);
-}
-
-function toggleRefine() {
-  const body = document.getElementById('refineBody');
-  const arrow = document.getElementById('refineArrow');
-  body.classList.toggle('open');
-  arrow.classList.toggle('open');
-}
-
-function updateConvert() {
-  const val = parseFloat(document.getElementById('resourceInput').value);
-  const el = document.getElementById('unitConvert');
-  if (!val || isNaN(val)) { el.textContent = '\u00a0'; return; }
-  if (currentUnit === 'moz') {
-    el.textContent = `= ${(val * 31.1).toFixed(1)} tonnes Au`;
-  } else {
-    el.textContent = `= ${(val / 31.1).toFixed(3)} Moz`;
-  }
-}
-
-document.getElementById('resourceInput').addEventListener('input', updateConvert);
-
-// ── CLOCK ──
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent =
-    now.toISOString().replace('T',' ').substring(0,19) + ' UTC';
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// ── PERCENTILE ──
 function percentile(arr, p) {
-  if (!arr.length) return 0;
   const sorted = [...arr].sort((a,b) => a-b);
   const idx = (p/100) * (sorted.length - 1);
   const lo = Math.floor(idx), hi = Math.ceil(idx);
-  if (lo === hi) return sorted[lo];
-  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+  return lo === hi ? sorted[lo] : sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
 }
 
-// ── SIMILARITY SCORE (international) ──
-function similarity(tx, resourceMoz, stage, grade, method, infra, country) {
-  let score = 0;
-  if (tx[2] === stage) score += 40;
-  else score += Math.max(0, 40 - Math.abs(tx[2] - stage) * 15);
-  const logDiff = Math.abs(Math.log(tx[0]) - Math.log(resourceMoz));
-  score += Math.max(0, 30 - logDiff * 12);
-  if (grade !== null && tx[4] > 0) {
-    const gradeDiff = Math.abs(tx[4] - grade) / Math.max(tx[4], grade);
-    score += Math.max(0, 20 - gradeDiff * 20);
-  } else {
-    score += 10;
-  }
-  if (country && tx[8] === country) score += 10;
-  else if (country) score += 0;
-  else score += 5;
-  return Math.round(score);
-}
-
-// ── CHINA SIMILARITY SCORE ──
-function similarityChina(tx, resourceTons, resourceClass, grade) {
-  let score = 0;
-  if (tx[2] === resourceClass) score += 40;
-  else score += Math.max(0, 40 - Math.abs(tx[2] - resourceClass) * 15);
-  const logDiff = Math.abs(Math.log(tx[0]) - Math.log(resourceTons));
-  score += Math.max(0, 30 - logDiff * 10);
-  if (grade !== null && tx[4] > 0) {
-    const gradeDiff = Math.abs(tx[4] - grade) / Math.max(tx[4], grade);
-    score += Math.max(0, 30 - gradeDiff * 30);
-  } else {
-    score += 15;
-  }
-  return Math.round(score);
-}
-
-// ── CHINA VALUATION LOGIC ──
-function calculateChina(params) {
-  const { resourceTons, resourceClass, grade, currentCopperCny, exchangeRate } = params;
-
-  let pool = CHINA_TRANSACTIONS.filter(tx => tx[2] === resourceClass);
-  if (pool.length < 3) {
-    pool = CHINA_TRANSACTIONS.filter(tx => Math.abs(tx[2] - resourceClass) <= 1);
-  }
-
-  let adjusted = pool.map(tx => {
-    // Normalize ev to current gold price with elasticity factor 0.65
-    // (mining rights prices don't move 1:1 with gold price due to policy stickiness)
-    const adjEv = tx[1] * Math.pow(currentCopperCny / tx[3], 0.65);
-    const score = similarityChina(tx, resourceTons, resourceClass, grade);
-    return { tx, adjEv, score };
-  });
-
-  adjusted.sort((a,b) => b.score - a.score);
-  const top = adjusted.slice(0, Math.min(15, adjusted.length));
-  const evValues = top.map(d => d.adjEv);
-
-  const p25cny = percentile(evValues, 25);
-  const p50cny = percentile(evValues, 50);
-  const p75cny = percentile(evValues, 75);
-
-  // Convert to USD per oz: yuan/gram * 31.1035 g/oz / (CNY per USD)
-  const cnyToUsdPerOz = 31.1035 / exchangeRate;
-  const p25usd = p25cny * cnyToUsdPerOz;
-  const p50usd = p50cny * cnyToUsdPerOz;
-  const p75usd = p75cny * cnyToUsdPerOz;
-
-  // Total values in CNY (yuan) and USD
-  const resourceGrams = resourceTons * 1e6; // tons -> grams
-  const totalLowCny  = p25cny * resourceGrams;
-  const totalMidCny  = p50cny * resourceGrams;
-  const totalHighCny = p75cny * resourceGrams;
-
-  return {
-    p25cny, p50cny, p75cny,
-    p25usd, p50usd, p75usd,
-    totalLowCny, totalMidCny, totalHighCny,
-    top,
-    nComps: top.length
-  };
-}
-
-// ── FORMAT HELPERS ──
-function fmtM(val) {
-  if (val >= 1e9) return `$${(val/1e9).toFixed(2)}B`;
-  if (val >= 1e6) return `$${(val/1e6).toFixed(0)}M`;
-  return `$${Math.round(val).toLocaleString()}`;
-}
-
-function fmtYi(val) {
-  // val is in yuan
-  if (val >= 1e8) return `${(val/1e8).toFixed(2)}\u4ebf\u5143`;
-  if (val >= 1e4) return `${(val/1e4).toFixed(0)}\u4e07\u5143`;
-  return `${Math.round(val).toLocaleString()}\u5143`;
-}
-
-// ── MAIN CALCULATION ──
 function calculate() {
-  let rawResource = parseFloat(document.getElementById('resourceInput').value);
-  if (!rawResource || isNaN(rawResource) || rawResource <= 0) {
-    alert('Please enter a valid resource size.');
+  const resourceInput = parseFloat(document.getElementById('resourceInput').value);
+  const grade = parseFloat(document.getElementById('gradeInput').value);
+  const copperPrice = parseFloat(document.getElementById('priceInput').value);
+  const stage = parseInt(document.getElementById('stageSelect').value);
+
+  if (!resourceInput || !grade) {
+    alert('请输入资源量和品位！');
     return;
   }
 
-  if (chinaMode) {
-    calculateChinaMode(rawResource);
+  // 计算铜金属量（万吨）
+  let cuMetalKt;
+  if (currentUnit === 'mt') {
+    cuMetalKt = resourceInput * grade / 100 * 10; // Mt * % / 100 * 10 = 万吨
   } else {
-    calculateIntlMode(rawResource);
+    cuMetalKt = resourceInput; // 已经是万吨
   }
+
+  // 筛选可比交易
+  const comps = copperDeals
+    .filter(d => d[5] === stage)
+    .map(d => ({
+      ...d,
+      adjEv: d[4] * (copperPrice / 4.5) // 标准化到当前铜价
+    })))
+    .sort((a,b) => Math.abs(a[2] - cuMetalKt) - Math.abs(b[2] - cuMetalKt))
+    .slice(0, 5);
+
+  const evValues = comps.map(d => d.adjEv);
+  const p25 = percentile(evValues, 25);
+  const p50 = percentile(evValues, 50);
+  const p75 = percentile(evValues, 75);
+
+  // 计算总价值（百万美元）
+  const cuMetalLb = cuMetalKt * 10000 * 2204.62; // 万吨 -> 磅
+  const totalLow = (p25 * cuMetalLb / 1e6).toFixed(0);
+  const totalMid = (p50 * cuMetalLb / 1e6).toFixed(0);
+  const totalHigh = (p75 * cuMetalLb / 1e6).toFixed(0);
+
+  // 显示结果
+  document.getElementById('lowValue').textContent = `$$${p25.toFixed(2)}/lb`;
+  document.getElementById('midValue').textContent = `$$${p50.toFixed(2)}/lb`;
+  document.getElementById('highValue').textContent = `$$${p75.toFixed(2)}/lb`;
+
+  document.getElementById('lowSub').textContent = `总价值: $$${totalLow}M | 铜金属: ${cuMetalKt.toFixed(0)}万吨`;
+  document.getElementById('midSub').textContent = `总价值: $$${totalMid}M | 铜金属: ${cuMetalKt.toFixed(0)}万吨`;
+  document.getElementById('highSub').textContent = `总价值: $$${totalHigh}M | 铜金属: ${cuMetalKt.toFixed(0)}万吨`;
+
+  // 显示可比交易
+  const tbody = document.getElementById('compsBody');
+  tbody.innerHTML = comps.map(d => `
+    <tr>
+      <td>${d[9]}</td>
+      <td>${d[6]}</td>
+      <td>${d[0].toFixed(0)}</td>
+      <td>${d[1].toFixed(2)}%</td>
+      <td>${d[2].toFixed(0)}</td>
+      <td style="color:#ff6b35;font-weight:600;">${d.adjEv.toFixed(2)}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('resultSection').classList.add('show');
 }
-
-// ── INTERNATIONAL MODE ──
-function calculateIntlMode(rawResource) {
-  const currentCopper = parseFloat(document.getElementById('goldPrice').value) || 3300;
-  const grade = parseFloat(document.getElementById('grade').value) || null;
-  const aisc = parseFloat(document.getElementById('aisc').value) || null;
-  const country = document.getElementById('country').value || null;
-  const miRatio = parseInt(document.getElementById('miRatio').value);
-
-  const resourceMoz = currentUnit === 'moz' ? rawResource : rawResource / 31.1;
-
-  let pool = TRANSACTIONS.filter(tx => tx[2] === currentStage);
-  if (pool.length < 3) {
-    pool = TRANSACTIONS.filter(tx => Math.abs(tx[2] - currentStage) <= 1);
-  }
-
-  let adjusted = pool.map(tx => {
-    const adjEv = tx[1] * (currentCopper / tx[3]);
-    const score = similarity(tx, resourceMoz, currentStage, grade, currentMethod, currentInfra, country);
-    return { tx, adjEv, score };
-  });
-
-  adjusted.sort((a,b) => b.score - a.score);
-  const top = adjusted.slice(0, Math.min(15, adjusted.length));
-  const evValues = top.map(d => d.adjEv);
-
-  let p25 = percentile(evValues, 25);
-  let p50 = percentile(evValues, 50);
-  let p75 = percentile(evValues, 75);
-
-  let isExtrapolated = false;
-  let liquidityDiscount = 0;
-  if (resourceMoz < 1) {
-    isExtrapolated = true;
-    if (resourceMoz < 0.1) liquidityDiscount = 0.50;
-    else if (resourceMoz < 0.3) liquidityDiscount = 0.40;
-    else liquidityDiscount = 0.30;
-    p25 *= (1 - liquidityDiscount);
-    p50 *= (1 - liquidityDiscount);
-    p75 *= (1 - liquidityDiscount);
-  }
-
-  const adjustments = [];
-  let adjMultiplier = 1.0;
-
-  if (grade !== null) {
-    if (grade > 5) {
-      adjMultiplier *= 1.15;
-      adjustments.push({ name: `Grade ${grade} g/t (>5 g/t premium)`, val: '+15%', cls: 'adj-pos' });
-    } else if (grade < 1.5) {
-      adjMultiplier *= 0.90;
-      adjustments.push({ name: `Grade ${grade} g/t (<1.5 g/t discount)`, val: '-10%', cls: 'adj-neg' });
-    } else {
-      adjustments.push({ name: `Grade ${grade} g/t (normal range)`, val: '0%', cls: 'adj-neu' });
-    }
-  }
-
-  if (aisc !== null) {
-    if (aisc < 800) {
-      adjMultiplier *= 1.12;
-      adjustments.push({ name: `AISC $${aisc}/oz (low cost premium)`, val: '+12%', cls: 'adj-pos' });
-    } else if (aisc > 1400) {
-      adjMultiplier *= 0.90;
-      adjustments.push({ name: `AISC $${aisc}/oz (high cost discount)`, val: '-10%', cls: 'adj-neg' });
-    } else {
-      adjustments.push({ name: `AISC $${aisc}/oz (normal range)`, val: '0%', cls: 'adj-neu' });
-    }
-  }
-
-  if (currentInfra === 1) {
-    adjMultiplier *= 1.15;
-    adjustments.push({ name: 'Brownfield infrastructure', val: '+15%', cls: 'adj-pos' });
-  } else if (currentInfra === 0) {
-    adjustments.push({ name: 'Greenfield (no infra bonus)', val: '0%', cls: 'adj-neu' });
-  }
-
-  if (country && country !== 'china') {
-    const countryMatch = top.filter(d => d.tx[8] === country).length;
-    if (countryMatch > 0) {
-      adjMultiplier *= 1.05;
-      adjustments.push({ name: `Country match: ${country} (${countryMatch} comps)`, val: '+5%', cls: 'adj-pos' });
-    }
-  }
-
-  if (isExtrapolated) {
-    adjustments.push({ name: `Liquidity discount (<1 Moz)`, val: `-${Math.round(liquidityDiscount*100)}%`, cls: 'adj-neg' });
-  }
-
-  p25 *= adjMultiplier;
-  p50 *= adjMultiplier;
-  p75 *= adjMultiplier;
-
-  const totalLow  = p25 * resourceMoz * 1e6;
-  const totalMid  = p50 * resourceMoz * 1e6;
-  const totalHigh = p75 * resourceMoz * 1e6;
-
-  // ── RENDER INTERNATIONAL ──
-  document.getElementById('placeholderState').style.display = 'none';
-  document.getElementById('valuationResult').style.display = 'block';
-
-  const maxEv = p75 * 1.1;
-  document.getElementById('barLow').style.width  = Math.min(100, (p25/maxEv)*100) + '%';
-  document.getElementById('barMid').style.width  = Math.min(100, (p50/maxEv)*100) + '%';
-  document.getElementById('barHigh').style.width = Math.min(100, (p75/maxEv)*100) + '%';
-
-  document.getElementById('evLow').textContent  = `$${Math.round(p25)}/oz`;
-  document.getElementById('evMid').textContent  = `$${Math.round(p50)}/oz`;
-  document.getElementById('evHigh').textContent = `$${Math.round(p75)}/oz`;
-
-  document.getElementById('totalLow').textContent  = `Total: ${fmtM(totalLow)}`;
-  document.getElementById('totalMid').textContent  = `Total: ${fmtM(totalMid)}`;
-  document.getElementById('totalHigh').textContent = `Total: ${fmtM(totalHigh)}`;
-
-  document.getElementById('secLow').textContent  = '';
-  document.getElementById('secMid').textContent  = '';
-  document.getElementById('secHigh').textContent = '';
-
-  document.getElementById('compCount').innerHTML =
-    `Based on <span>${top.length}</span> comparable transactions`;
-
-  const warn = document.getElementById('extrapolatedWarning');
-  warn.classList.toggle('visible', isExtrapolated);
-  document.getElementById('chinaRefCard').classList.remove('visible');
-  document.getElementById('chinaOverseasCard').classList.remove('visible');
-
-  const adjPanel = document.getElementById('adjPanel');
-  if (adjustments.length > 0) {
-    adjPanel.classList.add('visible');
-    document.getElementById('adjRows').innerHTML = adjustments.map(a =>
-      `<div class="adj-row"><span class="adj-name">${a.name}</span><span class="adj-val ${a.cls}">${a.val}</span></div>`
-    ).join('');
-  } else {
-    adjPanel.classList.remove('visible');
-  }
-
-  const top5 = adjusted.slice(0, 5);
-  renderCompsTable(top5, resourceMoz, currentCopper);
-}
-
-// ── CHINA MODE CALCULATION ──
-function calculateChinaMode(rawResource) {
-  const currentCopperCny = parseFloat(document.getElementById('goldPrice').value) || 680;
-  const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 7.25;
-  const grade = parseFloat(document.getElementById('grade').value) || null;
-
-  // Convert resource to tons of gold
-  let resourceTons;
-  if (currentUnit === 'moz') {
-    resourceTons = rawResource * 31.1035; // Moz -> tons
-  } else {
-    resourceTons = rawResource; // already tons
-  }
-
-  const result = calculateChina({
-    resourceTons,
-    resourceClass: chinaResourceClass,
-    grade,
-    currentCopperCny,
-    exchangeRate
-  });
-
-  const { p25cny, p50cny, p75cny, p25usd, p50usd, p75usd,
-          totalLowCny, totalMidCny, totalHighCny, top, nComps } = result;
-
-  // Total in USD
-  const totalLowUsd  = totalLowCny  / exchangeRate;
-  const totalMidUsd  = totalMidCny  / exchangeRate;
-  const totalHighUsd = totalHighCny / exchangeRate;
-
-  // ── RENDER CHINA ──
-  document.getElementById('placeholderState').style.display = 'none';
-  document.getElementById('valuationResult').style.display = 'block';
-
-  const maxEv = p75cny * 1.1;
-  document.getElementById('barLow').style.width  = Math.min(100, (p25cny/maxEv)*100) + '%';
-  document.getElementById('barMid').style.width  = Math.min(100, (p50cny/maxEv)*100) + '%';
-  document.getElementById('barHigh').style.width = Math.min(100, (p75cny/maxEv)*100) + '%';
-
-  document.getElementById('evLow').textContent  = `${Math.round(p25cny)}\u5143/\u514b`;
-  document.getElementById('evMid').textContent  = `${Math.round(p50cny)}\u5143/\u514b`;
-  document.getElementById('evHigh').textContent = `${Math.round(p75cny)}\u5143/\u514b`;
-
-  document.getElementById('totalLow').textContent  = `\u603b\u4ef7: ${fmtYi(totalLowCny)}`;
-  document.getElementById('totalMid').textContent  = `\u603b\u4ef7: ${fmtYi(totalMidCny)}`;
-  document.getElementById('totalHigh').textContent = `\u603b\u4ef7: ${fmtYi(totalHighCny)}`;
-
-  document.getElementById('secLow').textContent  = `$${Math.round(p25usd)}/oz | ${fmtM(totalLowUsd)}`;
-  document.getElementById('secMid').textContent  = `$${Math.round(p50usd)}/oz | ${fmtM(totalMidUsd)}`;
-  document.getElementById('secHigh').textContent = `$${Math.round(p75usd)}/oz | ${fmtM(totalHighUsd)}`;
-
-  document.getElementById('compCount').innerHTML =
-    `\u57fa\u4e8e <span>${nComps}</span> \u6761\u56fd\u5185\u53ef\u6bd4\u4ea4\u6613`;
-
-  document.getElementById('extrapolatedWarning').classList.remove('visible');
-  document.getElementById('adjPanel').classList.remove('visible');
-  document.getElementById('chinaRefCard').classList.add('visible');
-  document.getElementById('chinaOverseasCard').classList.add('visible');
-
-  renderChinaCompsTable(top, resourceTons, currentCopperCny, exchangeRate);
-}
-
-// ── INTERNATIONAL COMPARABLES TABLE ──
-function renderCompsTable(comps, resourceMoz, currentCopper) {
-  const maxScore = 100;
-  const rows = comps.map((d, i) => {
-    const tx = d.tx;
-    const adjEv = Math.round(d.adjEv);
-    const totalM = Math.round(tx[0] * d.adjEv * 1e6 / 1e6);
-    const matchPct = Math.round(d.score);
-    const barW = Math.round((d.score / maxScore) * 60);
-    const stageName = STAGE_NAMES[tx[2]] || tx[2];
-    const stageClass = `stage-${tx[2]}`;
-    return `<tr data-idx="${i}" onclick="selectRow(this, ${i})">
-      <td class="td-project" title="${tx[9]}">${tx[9]}</td>
-      <td><span class="stage-badge ${stageClass}">${stageName}</span></td>
-      <td style="font-family:var(--mono)">${tx[0].toFixed(1)} Moz</td>
-      <td class="td-ev">$${adjEv}/oz</td>
-      <td class="td-total">$${totalM}M</td>
-      <td><span class="match-bar" style="width:${barW}px"></span><span class="match-pct">${matchPct}%</span></td>
-    </tr>`;
-  }).join('');
-
-  document.getElementById('compTableContainer').innerHTML = `
-    <table class="comp-table">
-      <thead>
-        <tr>
-          <th>PROJECT</th>
-          <th>STAGE</th>
-          <th>RESOURCE</th>
-          <th>EV/oz (adj.)</th>
-          <th>TOTAL</th>
-          <th>MATCH</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-  document.getElementById('compSubtitle').textContent =
-    `Top ${comps.length} by similarity score \u2014 EV/oz normalized to $${currentCopper}/oz gold`;
-}
-
-// ── CHINA COMPARABLES TABLE ──
-function renderChinaCompsTable(comps, resourceTons, currentCopperCny, exchangeRate) {
-  const maxScore = 100;
-  const rows = comps.map((d, i) => {
-    const tx = d.tx;
-    const adjEv = Math.round(d.adjEv);
-    const totalYi = (adjEv * tx[0] * 1e6 / 1e8).toFixed(2); // yuan/gram * grams / 1e8 = yi yuan
-    const matchPct = Math.round(d.score);
-    const barW = Math.round((d.score / maxScore) * 50);
-    const rcName = STAGE_NAMES_CN[tx[2]] || tx[2];
-    const stageClass = `stage-${tx[2]}`;
-    return `<tr data-idx="${i}" onclick="selectRow(this, ${i})">
-      <td class="td-project" title="${tx[6]}">${tx[6]}</td>
-      <td><span class="stage-badge ${stageClass}">${rcName}</span></td>
-      <td style="font-family:var(--mono)">${tx[0].toFixed(1)}\u5428</td>
-      <td class="td-ev">${adjEv}\u5143/\u514b</td>
-      <td class="td-total">${totalYi}\u4ebf\u5143</td>
-      <td><span class="match-bar" style="width:${barW}px"></span><span class="match-pct">${matchPct}%</span></td>
-    </tr>`;
-  }).join('');
-
-  document.getElementById('compTableContainer').innerHTML = `
-    <table class="comp-table">
-      <thead>
-        <tr>
-          <th>\u9879\u76ee/\u5730\u533a</th>
-          <th>\u8d44\u6e90\u7c7b\u522b</th>
-          <th>\u8d44\u6e90\u91cf(\u5428)</th>
-          <th>\u5143/\u514b</th>
-          <th>\u603b\u4ef7(\u4ebf\u5143)</th>
-          <th>\u76f8\u4f3c\u5ea6</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div style="margin-top:10px;padding:8px 10px;background:rgba(201,76,76,0.06);border:1px solid rgba(201,76,76,0.3);border-left:3px solid var(--china-red);font-family:var(--mono);font-size:9px;color:var(--text-secondary);letter-spacing:0.03em;line-height:1.6;">
-      \u26a0 \u6570\u636e\u8bf4\u660e\uff1a\u4e2d\u56fd\u56fd\u5185\u77ff\u6743\u4ea4\u6613\u6570\u636e\u62ab\u9732\u6709\u9650\u3002\u4ee5\u4e0a\u53c2\u8003\u4ef7\u7efc\u5408\u81ea\uff1a\u2460\u5238\u5546\u7814\u62a5\u884c\u4e1a\u533a\u95f4\uff08\u4e2d\u4fe1/\u534e\u6cf0/\u56fd\u6cf0\u541b\u5b89\uff0c2022-2024\uff09\u2461\u4e0a\u5e02\u516c\u53f8\u91cd\u7ec4\u516c\u544a\u6458\u8981\uff08\u5c71\u4e1c\u9ec4\u91d1/\u62db\u91d1/\u4e2d\u91d1\u9ec4\u91d1\u7b49\uff09\u2462\u884c\u4e1a\u516c\u8ba4\u4f30\u503c\u65b9\u6cd5\uff08\u91d1\u5c5e\u4ef7\u503c\u6cd5\xd7\u6298\u6263\u7cfb\u6570 0.3-0.6\uff09\u3002\u5177\u4f53\u9879\u76ee\u5efa\u8bae\u901a\u8fc7 Wind/\u5de8\u6f6e\u8d44\u8baf/\u53f8\u6cd5\u62cd\u5356\u5e73\u53f0\u6838\u5b9e\u3002
-    </div>`;
-  document.getElementById('compSubtitle').textContent =
-    `\u6309\u76f8\u4f3c\u5ea6\u6392\u5e8f\u524d ${comps.length} \u6761 \u2014 \u5df2\u6309\u91d1\u4ef7\u6807\u51c6\u5316\u81f3 ${currentCopperCny}\u5143/\u514b`;
-}
-
-function goldPriceToYear(price) {
-  if (price < 1200) return '~2010';
-  if (price < 1400) return '~2012';
-  if (price < 1600) return '~2014';
-  if (price < 1800) return '~2020';
-  if (price < 2000) return '~2021';
-  if (price < 2500) return '~2023';
-  if (price < 3000) return '~2024';
-  return '~2025';
-}
-
-function selectRow(tr, idx) {
-  document.querySelectorAll('.comp-table tr').forEach(r => r.classList.remove('selected'));
-  tr.classList.add('selected');
-}
-
-// Allow Enter key to trigger calculation
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') calculate();
-});
 </script>
 </body>
 </html>
