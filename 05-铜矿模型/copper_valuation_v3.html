@@ -163,7 +163,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
   </div>
   <div class="hdr-meta">
     <div>COMPARABLE TRANSACTION METHOD &nbsp;|&nbsp; NET EV/lb Cu</div>
-    <div>DATABASE: <span class="live">30 VERIFIED M&amp;A DEALS 2010&#x2013;2024</span> &nbsp;|&nbsp; v3.0</div>
+    <div>DATABASE: <span class="live">38 VERIFIED M&amp;A DEALS 2010&#x2013;2025</span> &nbsp;|&nbsp; v3.0</div>
     <div id="clock" style="margin-top:3px"></div>
   </div>
 </div>
@@ -331,11 +331,14 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 
     <!-- China CNY panel -->
     <div class="cn-card" id="cnCard">
-      <div class="cn-title">&#20013;&#22269;&#39069;&#21442;&#32771;&#20215; (&#20803;/&#21051;Cu)</div>
-      <div class="cn-row"><span>&#22312;&#20135;&#37319;&#30719;&#26435;</span><span class="cn-range">30&#x2013;80 &#19975;&#20803;/&#21051;</span></div>
-      <div class="cn-row"><span>331&#31867; &#25506;&#26126;&#36164;&#28304;&#37327;</span><span class="cn-range">10&#x2013;25 &#19975;&#20803;/&#21051;</span></div>
-      <div class="cn-row"><span>333&#31867; &#25512;&#26029;&#36164;&#28304;&#37327;</span><span class="cn-range">3&#x2013;10 &#19975;&#20803;/&#21051;</span></div>
-      <div style="margin-top:5px;font-size:8.5px;color:var(--txt3)">&#27880;&#65306;&#22269;&#20869;&#37319;&#30719;&#26435;&#20132;&#26131;&#25968;&#25454;&#25114;&#38706;&#26377;&#38480;&#65292;&#20197;&#19978;&#20026;&#34892;&#19994;&#21442;&#32771;&#21306;&#38388;</div>
+      <div class="cn-title">中国铜矿权参考价 (万元/吨Cu)</div>
+      <div class="cn-row"><span>采矿权 高品位在产(山东/江西)</span><span class="cn-range">50–80 万元/吨</span></div>
+      <div class="cn-row"><span>采矿权 中型在产(云南/内蒙)</span><span class="cn-range">30–60 万元/吨</span></div>
+      <div class="cn-row"><span>采矿权 小型/偏远地区</span><span class="cn-range">15–35 万元/吨</span></div>
+      <div class="cn-row"><span>331类 探明资源量</span><span class="cn-range">8–20 万元/吨</span></div>
+      <div class="cn-row"><span>332类 控制资源量</span><span class="cn-range">4–12 万元/吨</span></div>
+      <div class="cn-row"><span>333类 推断资源量</span><span class="cn-range">1–6 万元/吨</span></div>
+      <div style="margin-top:5px;font-size:8.5px;color:var(--txt3)">注：基于行业研究报告参考区间（中信/华泰/国泰君安，2022-2024）。具体项目建议通过Wind/司法拍卖平台核实。溢价：山东/江西高品位 +50–100%；折价：西部偏远/低品位 −30–50%</div>
       <div style="margin-top:4px;font-size:8.5px;color:var(--txt3)">CNY/USD: <input type="number" id="cnyRate" value="7.25" min="5" max="10" step="0.01" style="width:60px;font-size:9px;padding:2px 4px;display:inline-block"></div>
     </div>
 
@@ -479,27 +482,36 @@ const DB = [
   {project:'OZ Minerals Portfolio',buyer:'BHP',year:2023,country:'australia',depositType:'iocg',stage:4,oreMt:1650,cuPct:1.2,cuKt:19800,auGt:0.25,agGt:2.0,moPpm:0,coPpm:0,evUsdM:6400,cuPriceAtDeal:3.9,evPerLbCu:0.66,c1UsdLb:1.1,miningMethod:2,infra:1},
   {project:'Newcrest / Cadia',buyer:'Newmont',year:2023,country:'australia',depositType:'porphyry',stage:4,oreMt:4200,cuPct:0.35,cuKt:14700,auGt:0.32,agGt:0,moPpm:0,coPpm:0,evUsdM:19100,cuPriceAtDeal:3.9,evPerLbCu:2.95,c1UsdLb:0.8,miningMethod:2,infra:1},
   {project:'Caserones 51%',buyer:'Lundin Mining',year:2023,country:'chile',depositType:'porphyry',stage:4,oreMt:1200,cuPct:0.31,cuKt:3720,auGt:0,agGt:0,moPpm:120,coPpm:0,evUsdM:950,cuPriceAtDeal:3.9,evPerLbCu:0.58,c1UsdLb:1.8,miningMethod:0,infra:1},
+  {project:'Konkola Copper Mines',buyer:'Vedanta Resources',year:2023,country:'zambia',depositType:'sediment',stage:4,oreMt:150,cuPct:2.9,cuKt:4350,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:1000,cuPriceAtDeal:3.9,evPerLbCu:0.52,c1UsdLb:2.2,miningMethod:1,infra:1},
   // 2022
   {project:'Turquoise Hill / Oyu Tolgoi',buyer:'Rio Tinto',year:2022,country:'mongolia',depositType:'porphyry',stage:4,oreMt:3500,cuPct:0.51,cuKt:17850,auGt:0.31,agGt:1.5,moPpm:0,coPpm:0,evUsdM:3300,cuPriceAtDeal:4.2,evPerLbCu:0.42,c1UsdLb:1.2,miningMethod:2,infra:1},
   {project:'MATSA',buyer:'Sandfire Resources',year:2022,country:'spain',depositType:'vms',stage:4,oreMt:45,cuPct:2.8,cuKt:1260,auGt:0.5,agGt:30,moPpm:0,coPpm:0,evUsdM:1870,cuPriceAtDeal:4.2,evPerLbCu:3.37,c1UsdLb:1.5,miningMethod:1,infra:1},
   {project:'Capstone + Mantos Copper',buyer:'Capstone Copper',year:2022,country:'chile',depositType:'iocg',stage:4,oreMt:600,cuPct:0.55,cuKt:3300,auGt:0.1,agGt:1.5,moPpm:0,coPpm:0,evUsdM:1100,cuPriceAtDeal:4.2,evPerLbCu:0.76,c1UsdLb:1.6,miningMethod:0,infra:1},
+  {project:'Reko Diq 50%',buyer:'Barrick Gold',year:2022,country:'other_high',depositType:'porphyry',stage:2,oreMt:5900,cuPct:0.41,cuKt:24190,auGt:0.22,agGt:0,moPpm:0,coPpm:0,evUsdM:900,cuPriceAtDeal:4.2,evPerLbCu:0.085,c1UsdLb:0,miningMethod:0,infra:0},
   // 2021
   {project:'Copper Mountain',buyer:'Hudbay Minerals',year:2021,country:'canada',depositType:'porphyry',stage:4,oreMt:380,cuPct:0.28,cuKt:1064,auGt:0.18,agGt:1.2,moPpm:0,coPpm:0,evUsdM:439,cuPriceAtDeal:4.0,evPerLbCu:0.94,c1UsdLb:1.9,miningMethod:0,infra:1},
   {project:'Mopani 73%',buyer:'ZCCM Zambia',year:2021,country:'zambia',depositType:'sediment',stage:4,oreMt:80,cuPct:2.8,cuKt:2240,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:1500,cuPriceAtDeal:3.5,evPerLbCu:0.30,c1UsdLb:2.5,miningMethod:1,infra:1},
   // 2018
   {project:'Quebrada Blanca 30%',buyer:'Sumitomo Metal Mining',year:2018,country:'chile',depositType:'porphyry',stage:3,oreMt:1100,cuPct:0.48,cuKt:5280,auGt:0,agGt:0,moPpm:80,coPpm:0,evUsdM:1200,cuPriceAtDeal:3.1,evPerLbCu:0.52,c1UsdLb:0,miningMethod:0,infra:0},
   {project:'Timok Upper Zone',buyer:'Zijin Mining',year:2018,country:'other_low',depositType:'vms',stage:2,oreMt:35,cuPct:2.9,cuKt:1015,auGt:1.8,agGt:0,moPpm:0,coPpm:0,evUsdM:390,cuPriceAtDeal:3.1,evPerLbCu:0.87,c1UsdLb:0,miningMethod:1,infra:0},
+  {project:'Grasberg 51%',buyer:'PT Inalum Indonesia',year:2018,country:'other_high',depositType:'porphyry',stage:4,oreMt:3000,cuPct:0.85,cuKt:25500,auGt:0.85,agGt:3.0,moPpm:0,coPpm:0,evUsdM:3850,cuPriceAtDeal:3.1,evPerLbCu:0.34,c1UsdLb:0.9,miningMethod:2,infra:1},
+  {project:'Cukaru Peki Lower Zone',buyer:'Zijin Mining',year:2018,country:'other_low',depositType:'porphyry',stage:2,oreMt:1200,cuPct:0.86,cuKt:10320,auGt:0.18,agGt:0,moPpm:0,coPpm:0,evUsdM:350,cuPriceAtDeal:3.1,evPerLbCu:0.077,c1UsdLb:0,miningMethod:1,infra:0},
   // 2016
+  {project:'Tenke Fungurume',buyer:'CMOC (China Moly)',year:2016,country:'drc',depositType:'sediment',stage:4,oreMt:400,cuPct:2.6,cuKt:10400,auGt:0,agGt:0,moPpm:0,coPpm:800,evUsdM:2650,cuPriceAtDeal:2.1,evPerLbCu:0.58,c1UsdLb:1.5,miningMethod:0,infra:1},
   {project:'Katanga + Mutanda stakes',buyer:'Glencore',year:2016,country:'drc',depositType:'sediment',stage:4,oreMt:800,cuPct:2.5,cuKt:20000,auGt:0,agGt:0,moPpm:0,coPpm:3000,evUsdM:960,cuPriceAtDeal:2.2,evPerLbCu:0.11,c1UsdLb:1.8,miningMethod:0,infra:1},
+  {project:'Morenci 13% stake',buyer:'Sumitomo Metal Mining',year:2016,country:'usa',depositType:'porphyry',stage:4,oreMt:4000,cuPct:0.22,cuKt:8800,auGt:0.05,agGt:0,moPpm:0,coPpm:0,evUsdM:1000,cuPriceAtDeal:2.1,evPerLbCu:0.26,c1UsdLb:1.6,miningMethod:0,infra:1},
   // 2015
   {project:'Kamoa 49.5%',buyer:'Zijin Mining',year:2015,country:'drc',depositType:'sediment',stage:2,oreMt:1200,cuPct:2.7,cuKt:32400,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:412,cuPriceAtDeal:2.5,evPerLbCu:0.029,c1UsdLb:0,miningMethod:0,infra:0},
   {project:'Zaldivar 50%',buyer:'Antofagasta',year:2015,country:'chile',depositType:'porphyry',stage:4,oreMt:450,cuPct:0.45,cuKt:2025,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:1030,cuPriceAtDeal:2.5,evPerLbCu:1.16,c1UsdLb:1.5,miningMethod:0,infra:1},
+  {project:'Frieda River',buyer:'PanAust',year:2015,country:'other_high',depositType:'porphyry',stage:2,oreMt:2200,cuPct:0.45,cuKt:9900,auGt:0.28,agGt:0,moPpm:0,coPpm:0,evUsdM:175,cuPriceAtDeal:2.5,evPerLbCu:0.040,c1UsdLb:0,miningMethod:0,infra:0},
   // 2014
   {project:'Las Bambas',buyer:'MMG (China Minmetals)',year:2014,country:'peru',depositType:'porphyry',stage:3,oreMt:2200,cuPct:0.73,cuKt:16060,auGt:0.07,agGt:5.0,moPpm:150,coPpm:0,evUsdM:5850,cuPriceAtDeal:3.1,evPerLbCu:0.83,c1UsdLb:0,miningMethod:0,infra:0},
   {project:'Sierra Gorda',buyer:'KGHM',year:2014,country:'chile',depositType:'porphyry',stage:3,oreMt:1800,cuPct:0.38,cuKt:6840,auGt:0.07,agGt:1.5,moPpm:200,coPpm:0,evUsdM:4160,cuPriceAtDeal:3.1,evPerLbCu:1.38,c1UsdLb:0,miningMethod:0,infra:0},
+  {project:'Candelaria 80%',buyer:'Lundin Mining',year:2014,country:'chile',depositType:'iocg',stage:4,oreMt:700,cuPct:0.65,cuKt:4550,auGt:0.18,agGt:3.5,moPpm:0,coPpm:0,evUsdM:1800,cuPriceAtDeal:3.1,evPerLbCu:0.90,c1UsdLb:1.4,miningMethod:0,infra:1},
   // 2013
   {project:'Lumina Copper / Caspiche',buyer:'Goldcorp',year:2013,country:'chile',depositType:'porphyry',stage:2,oreMt:1400,cuPct:0.28,cuKt:3920,auGt:0.55,agGt:0,moPpm:0,coPpm:0,evUsdM:520,cuPriceAtDeal:3.4,evPerLbCu:0.30,c1UsdLb:0,miningMethod:0,infra:0},
   {project:'Xstrata (Glencore merger)',buyer:'Glencore',year:2013,country:'other_low',depositType:'porphyry',stage:4,oreMt:5000,cuPct:0.8,cuKt:40000,auGt:0.1,agGt:2.0,moPpm:50,coPpm:0,evUsdM:30000,cuPriceAtDeal:3.6,evPerLbCu:1.70,c1UsdLb:1.3,miningMethod:2,infra:1},
+  {project:'Pebble 50%',buyer:'Northern Dynasty',year:2013,country:'usa',depositType:'porphyry',stage:2,oreMt:5400,cuPct:0.31,cuKt:16740,auGt:0.34,agGt:1.5,moPpm:0,coPpm:0,evUsdM:1500,cuPriceAtDeal:3.4,evPerLbCu:0.20,c1UsdLb:0,miningMethod:0,infra:0},
   // 2012
   {project:'Duluth Complex 60%',buyer:'Antofagasta',year:2012,country:'usa',depositType:'sediment',stage:2,oreMt:1800,cuPct:0.66,cuKt:11880,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:682,cuPriceAtDeal:3.6,evPerLbCu:0.14,c1UsdLb:0,miningMethod:1,infra:0},
   {project:'Constancia',buyer:'Hudbay Minerals',year:2012,country:'peru',depositType:'skarn',stage:3,oreMt:500,cuPct:0.35,cuKt:1750,auGt:0.06,agGt:3.5,moPpm:50,coPpm:0,evUsdM:520,cuPriceAtDeal:3.6,evPerLbCu:0.67,c1UsdLb:0,miningMethod:0,infra:0},
@@ -510,10 +522,6 @@ const DB = [
   // 2010
   {project:'Neves-Corvo expansion',buyer:'Lundin Mining',year:2010,country:'spain',depositType:'vms',stage:4,oreMt:30,cuPct:3.2,cuKt:960,auGt:0,agGt:15,moPpm:0,coPpm:0,evUsdM:450,cuPriceAtDeal:3.4,evPerLbCu:1.07,c1UsdLb:1.6,miningMethod:1,infra:1},
   {project:'Haquira',buyer:'First Quantum',year:2010,country:'peru',depositType:'porphyry',stage:2,oreMt:900,cuPct:0.52,cuKt:4680,auGt:0.05,agGt:0,moPpm:0,coPpm:0,evUsdM:470,cuPriceAtDeal:3.4,evPerLbCu:0.23,c1UsdLb:0,miningMethod:0,infra:0},
-  // Additional
-  {project:'Reko Diq 50%',buyer:'Barrick Gold',year:2022,country:'other_high',depositType:'porphyry',stage:2,oreMt:5900,cuPct:0.41,cuKt:24190,auGt:0.22,agGt:0,moPpm:0,coPpm:0,evUsdM:900,cuPriceAtDeal:4.2,evPerLbCu:0.085,c1UsdLb:0,miningMethod:0,infra:0},
-  {project:'Pebble 50%',buyer:'Northern Dynasty',year:2013,country:'usa',depositType:'porphyry',stage:2,oreMt:5400,cuPct:0.31,cuKt:16740,auGt:0.34,agGt:1.5,moPpm:0,coPpm:0,evUsdM:1500,cuPriceAtDeal:3.4,evPerLbCu:0.20,c1UsdLb:0,miningMethod:0,infra:0},
-  {project:'Frieda River',buyer:'PanAust',year:2015,country:'other_high',depositType:'porphyry',stage:2,oreMt:2200,cuPct:0.45,cuKt:9900,auGt:0.28,agGt:0,moPpm:0,coPpm:0,evUsdM:175,cuPriceAtDeal:2.5,evPerLbCu:0.040,c1UsdLb:0,miningMethod:0,infra:0},
 ];
 
 // ── CONSTANTS ──────────────────────────────────────────────────────────────
@@ -909,6 +917,22 @@ function renderResult(r, inp) {
   if (mode === 'expert') {
     sensWrap.classList.add('vis');
     buildHeatmap(inp, r);
+    // RF model prediction
+    const rfPred = getRfPrediction(inp, r.userBp.perLb || 0);
+    const rfWarn = document.getElementById('rfWarn');
+    if (rfPred !== null && r.p50 > 0) {
+      const divergence = Math.abs(rfPred - r.p50) / r.p50;
+      if (divergence > 0.30) {
+        rfWarn.textContent = `⚠ RF MODEL DIVERGENCE ${(divergence*100).toFixed(0)}% — RF predicts $${rfPred.toFixed(3)}/lb vs comps P50 $${r.p50.toFixed(3)}/lb. Treat with caution.`;
+        rfWarn.classList.add('vis');
+      } else {
+        rfWarn.textContent = `RF model: $${rfPred.toFixed(3)}/lb — within 30% of comps P50 ($${r.p50.toFixed(3)}/lb). Consistent.`;
+        rfWarn.classList.add('vis');
+        rfWarn.style.color = 'var(--green)';
+      }
+    } else {
+      rfWarn.classList.remove('vis');
+    }
   } else {
     sensWrap.classList.remove('vis');
   }
@@ -989,6 +1013,41 @@ updateClock();
 
 // Enter key triggers calculate
 document.addEventListener('keydown', e => { if (e.key==='Enter') calculate(); });
+
+// ── RF MODEL ──────────────────────────────────────────────────────────────
+// RF_TREES: 39 deals, 5-fold R2=-0.955
+// Target: gross EV/lb Cu (normalized to deal-time Cu price)
+// Features: [log_cuKt, cuPct, stage, depositType, countryRisk, c1Cost, bpCredit, miningMethod, infra]
+const RF_TREES = [{"f":0,"th":7.3031,"l":{"f":5,"th":1.85,"l":{"v":2.745},"r":{"v":0.9267}},"r":{"f":4,"th":0.065,"l":{"f":7,"th":1.5,"l":{"f":2,"th":2.5,"l":{"v":0.2133},"r":{"v":1.105}},"r":{"v":2.065}},"r":{"f":2,"th":2.5,"l":{"f":1,"th":0.63,"l":{"v":0.143},"r":{"v":0.0477}},"r":{"f":0,"th":9.8466,"l":{"v":0.5067},"r":{"v":0.1675}}}}},{"f":0,"th":7.4265,"l":{"f":5,"th":1.7,"l":{"v":2.6033},"r":{"v":1.75}},"r":{"f":1,"th":0.535,"l":{"f":0,"th":8.5843,"l":{"f":4,"th":0.065,"l":{"v":0.4467},"r":{"v":0.32}},"r":{"v":0.1918}},"r":{"f":1,"th":0.83,"l":{"f":6,"th":0.6934,"l":{"v":1.5},"r":{"v":0.8067}},"r":{"f":0,"th":9.2457,"l":{"v":0.299},"r":{"v":0.628}}}}},{"f":1,"th":2.75,"l":{"f":2,"th":2.5,"l":{"f":1,"th":0.59,"l":{"f":0,"th":8.3625,"l":{"v":0.3367},"r":{"v":0.23}},"r":{"f":4,"th":0.075,"l":{"v":0.1085},"r":{"v":0.043}}},"r":{"f":6,"th":0.0454,"l":{"v":1.2933},"r":{"f":5,"th":0.85,"l":{"v":1.0783},"r":{"v":0.549}}}},"r":{"f":5,"th":1.95,"l":{"v":2.5367},"r":{"v":0.61}}},{"f":0,"th":7.3031,"l":{"f":6,"th":1.8281,"l":{"f":6,"th":0.0846,"l":{"v":2.145},"r":{"v":2.22}},"r":{"v":0.6113}},"r":{"f":2,"th":2.5,"l":{"f":6,"th":0.1967,"l":{"v":0.066},"r":{"v":0.278}},"r":{"f":1,"th":0.825,"l":{"f":0,"th":9.0993,"l":{"v":0.7076},"r":{"v":1.735}},"r":{"f":1,"th":2.7,"l":{"v":0.5229},"r":{"v":0.3733}}}}},{"f":3,"th":1.5,"l":{"f":6,"th":0.921,"l":{"f":0,"th":8.0606,"l":{"v":1.03},"r":{"f":3,"th":0.5,"l":{"v":0.565},"r":{"v":0.685}}},"r":{"f":6,"th":1.4148,"l":{"v":0.42},"r":{"f":6,"th":2.5689,"l":{"v":0.0517},"r":{"v":0.2597}}}},"r":{"f":6,"th":0.6432,"l":{"f":5,"th":1.85,"l":{"v":1.1618},"r":{"v":0.7133}},"r":{"v":2.12}}},{"f":1,"th":3.05,"l":{"f":7,"th":1.5,"l":{"f":0,"th":8.437,"l":{"f":5,"th":1.75,"l":{"v":0.95},"r":{"v":0.528}},"r":{"f":2,"th":2.5,"l":{"v":0.138},"r":{"v":0.5002}}},"r":{"v":1.685}},"r":{"v":2.22}},{"f":0,"th":9.1582,"l":{"f":0,"th":8.7137,"l":{"f":4,"th":0.09,"l":{"f":1,"th":0.6,"l":{"v":0.6811},"r":{"v":0.926}},"r":{"f":6,"th":0.7513,"l":{"v":0.4467},"r":{"v":0.2066}}},"r":{"v":1.32}},"r":{"f":7,"th":1.5,"l":{"f":6,"th":2.2312,"l":{"f":0,"th":9.9986,"l":{"v":0.101},"r":{"v":0.057}},"r":{"v":0.0457}},"r":{"v":0.44}}}];
+
+function rfPredict(inp, bpCreditPerLb) {
+  const DEP_ENC = {porphyry:0,iocg:1,vms:2,sediment:3,skarn:4};
+  const CRISK = {australia:0,canada:0,usa:0,chile:0.05,peru:0.08,argentina:0.10,spain:0,mongolia:0.15,zambia:0.15,drc:0.30,other_low:0.05,other_high:0.25,china_dom:0,serbia:0.12,indonesia:0.12};
+  const feat = [
+    Math.log(Math.max(inp.cuKt,1)),
+    inp.cuPct||0, inp.stage||4,
+    DEP_ENC[inp.depositType]\!==undefined?DEP_ENC[inp.depositType]:0,
+    CRISK[inp.country]\!==undefined?CRISK[inp.country]:0.1,
+    inp.c1||0, bpCreditPerLb||0,
+    inp.method\!==null&&inp.method\!==undefined?inp.method:0,
+    inp.infra\!==null&&inp.infra\!==undefined?inp.infra:0,
+  ];
+  function traverse(node) {
+    if ('v' in node) return node.v;
+    return feat[node.f]<=node.th?traverse(node.l):traverse(node.r);
+  }
+  const preds = RF_TREES.map(traverse);
+  return Math.max(0, preds.reduce((a,b)=>a+b,0)/preds.length);
+}
+
+// ── RF INTEGRATION ────────────────────────────────────────────────────────
+function getRfPrediction(inp, bpCreditPerLb) {
+  try {
+    return rfPredict(inp, bpCreditPerLb);
+  } catch(e) {
+    return null;
+  }
+}
 </script>
 </body>
 </html>
