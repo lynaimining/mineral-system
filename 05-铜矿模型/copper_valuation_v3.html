@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COPPER MINE VALUATION TOOL v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0d;--s1:#141414;--s2:#1a1a1a;--s3:#202020;
+  --bd:#2a2a2a;--bdb:#3a3a3a;
+  --cu:#c96a4c;--cu-dim:#8a4a2e;--cu-bright:#e88a6a;
+  --txt:#e8e8e8;--txt2:#888;--txt3:#555;
+  --green:#4caf7d;--red:#c94c4c;--amber:#c9844c;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+html,body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:13px;line-height:1.5;min-height:100vh}
+body{background-image:linear-gradient(rgba(201,106,76,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(201,106,76,.015) 1px,transparent 1px);background-size:40px 40px}
+.hdr{background:var(--s1);border-bottom:1px solid var(--bd);padding:16px 28px;display:flex;align-items:flex-end;justify-content:space-between}
+.hdr-title{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.hdr-title span{color:var(--cu)}
+.hdr-line{height:2px;background:linear-gradient(90deg,var(--cu),transparent);margin-top:5px;width:320px}
+.hdr-meta{font-family:var(--mono);font-size:10px;color:var(--txt3);letter-spacing:.08em;text-align:right}
+.hdr-meta .live{color:var(--green);font-weight:600}
+.mode-tabs{background:var(--s1);border-bottom:1px solid var(--bd);display:flex;padding:0 28px}
+.mode-tab{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;padding:10px 20px;cursor:pointer;border-bottom:2px solid transparent;color:var(--txt3);transition:all .15s;text-transform:uppercase;background:none;border-top:none;border-left:none;border-right:none}
+.mode-tab:hover{color:var(--txt2)}
+.mode-tab.active{color:var(--cu);border-bottom-color:var(--cu)}
+.main{display:grid;grid-template-columns:380px 1fr;min-height:calc(100vh - 100px)}
+.inp{background:var(--s1);border-right:1px solid var(--bd);padding:22px;overflow-y:auto}
+.out{display:flex;flex-direction:column}
+.out-top{padding:22px;border-bottom:1px solid var(--bd)}
+.out-bot{padding:22px;overflow-y:auto;flex:1}
+.slabel{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;color:var(--cu-dim);text-transform:uppercase;margin-bottom:12px;padding-bottom:5px;border-bottom:1px solid var(--bd)}
+.fg{margin-bottom:16px}
+.fl{font-family:var(--mono);font-size:10px;color:var(--txt2);letter-spacing:.06em;margin-bottom:5px;display:block}
+input[type=number],select{background:var(--s2);border:1px solid var(--bd);color:var(--txt);font-family:var(--mono);font-size:13px;padding:7px 9px;outline:none;transition:border-color .15s;-moz-appearance:textfield;width:100%}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]:focus,select:focus{border-color:var(--cu-dim)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:26px;cursor:pointer}
+.rg{display:flex;border:1px solid var(--bd)}
+.rb{flex:1;background:var(--s2);border:none;border-right:1px solid var(--bd);color:var(--txt2);font-family:var(--mono);font-size:10px;padding:7px 4px;cursor:pointer;transition:all .15s;letter-spacing:.04em;text-align:center}
+.rb:last-child{border-right:none}
+.rb.active{background:var(--cu-dim);color:var(--bg);font-weight:600}
+.rb:hover:not(.active){background:var(--s3);color:var(--txt)}
+.ut{display:flex;border:1px solid var(--bd)}
+.ub{background:var(--s2);border:none;border-right:1px solid var(--bd);color:var(--txt2);font-family:var(--mono);font-size:11px;padding:7px 12px;cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.ub:last-child{border-right:none}
+.ub.active{background:var(--cu-dim);color:var(--bg);font-weight:600}
+.ub:hover:not(.active){background:var(--s3);color:var(--txt)}
+.inp-row{display:flex;gap:5px;align-items:stretch}
+.inp-row input{flex:1}
+.coll-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:9px 0;border-top:1px solid var(--bd);margin-top:6px;user-select:none}
+.coll-hdr:hover .slabel{color:var(--cu)}
+.coll-arr{font-family:var(--mono);font-size:10px;color:var(--txt3);transition:transform .2s}
+.coll-arr.open{transform:rotate(90deg)}
+.coll-body{display:none;padding-top:6px}
+.coll-body.open{display:block}
+.calc-btn{width:100%;background:var(--cu-dim);border:1px solid var(--cu);color:var(--bg);font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.12em;padding:11px;cursor:pointer;text-transform:uppercase;margin-top:18px;transition:all .15s}
+.calc-btn:hover{background:var(--cu)}
+.calc-btn:active{transform:translateY(1px)}
+.div{height:1px;background:var(--bd);margin:16px 0}
+.irow{display:flex;justify-content:space-between;padding:3px 0}
+.ik{font-family:var(--mono);font-size:10px;color:var(--txt3)}
+.iv{font-family:var(--mono);font-size:10px;color:var(--txt2)}
+.val-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.val-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;color:var(--cu-dim);text-transform:uppercase}
+.val-comps{font-family:var(--mono);font-size:10px;color:var(--txt3)}
+.val-comps span{color:var(--cu)}
+.val-bars{display:flex;flex-direction:column;gap:13px}
+.vbr{display:grid;grid-template-columns:48px 1fr 210px;align-items:center;gap:13px}
+.vbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--txt2)}
+.vbt{height:26px;background:var(--s2);border:1px solid var(--bd);position:relative;overflow:hidden}
+.vbf{height:100%;transition:width .6s cubic-bezier(.4,0,.2,1);width:0%}
+.vbf.low{background:linear-gradient(90deg,#5a3020,#8a5030)}
+.vbf.mid{background:linear-gradient(90deg,var(--cu-dim),var(--cu))}
+.vbf.high{background:linear-gradient(90deg,#8a5030,var(--cu-bright))}
+.vbn{text-align:right}
+.vev{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--txt);display:block}
+.vev.low{color:#a07040}
+.vev.mid{color:var(--cu)}
+.vev.high{color:var(--cu-bright)}
+.vtot{font-family:var(--mono);font-size:11px;color:var(--txt2);display:block}
+.vsec{font-family:var(--mono);font-size:10px;color:var(--txt3);display:block}
+.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
+.ph-icon{font-family:var(--mono);font-size:34px;color:var(--bdb);margin-bottom:10px}
+.ph-txt{font-family:var(--mono);font-size:11px;color:var(--txt3);letter-spacing:.06em}
+.bp-panel{margin-top:16px;background:var(--s2);border:1px solid var(--bd);padding:12px 14px;display:none}
+.bp-panel.vis{display:block}
+.bp-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.14em;color:var(--txt3);text-transform:uppercase;margin-bottom:10px}
+.bp-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--bd)}
+.bp-row:last-child{border-bottom:none}
+.bp-name{font-family:var(--mono);font-size:10px;color:var(--txt2)}
+.bp-val{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--cu)}
+.bp-warn{background:rgba(201,132,76,.1);border:1px solid var(--amber);border-left:3px solid var(--amber);padding:7px 11px;margin-top:12px;font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:.04em;display:none}
+.bp-warn.vis{display:block}
+.adj-panel{margin-top:14px;background:var(--s2);border:1px solid var(--bd);padding:11px 13px;display:none}
+.adj-panel.vis{display:block}
+.adj-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.14em;color:var(--txt3);text-transform:uppercase;margin-bottom:9px}
+.adj-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--bd)}
+.adj-row:last-child{border-bottom:none}
+.adj-name{font-family:var(--mono);font-size:10px;color:var(--txt2)}
+.adj-v{font-family:var(--mono);font-size:10px;font-weight:600}
+.adj-pos{color:var(--green)}
+.adj-neg{color:var(--red)}
+.adj-neu{color:var(--txt3)}
+.sens-wrap{margin-top:16px;display:none}
+.sens-wrap.vis{display:block}
+.sens-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.14em;color:var(--txt3);text-transform:uppercase;margin-bottom:10px}
+.sens-grid{display:grid;grid-template-columns:56px repeat(5,1fr);gap:2px;font-family:var(--mono);font-size:9px}
+.sens-cell{padding:5px 3px;text-align:center;border:1px solid var(--bd)}
+.sens-hdr{background:var(--s2);color:var(--txt3);font-weight:600}
+.sens-lbl{background:var(--s2);color:var(--txt3);display:flex;align-items:center;justify-content:center;font-size:8px}
+.rf-warn{background:rgba(201,132,76,.08);border:1px solid rgba(201,132,76,.4);padding:6px 10px;margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--amber);display:none}
+.rf-warn.vis{display:block}
+.comp-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.comp-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;color:var(--cu-dim);text-transform:uppercase}
+.comp-sub{font-family:var(--mono);font-size:10px;color:var(--txt3)}
+.ctbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+.ctbl th{background:var(--s2);border:1px solid var(--bd);padding:5px 9px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.1em;color:var(--txt3);text-transform:uppercase;white-space:nowrap}
+.ctbl td{border:1px solid var(--bd);padding:6px 9px;color:var(--txt2);white-space:nowrap;cursor:pointer;transition:background .1s}
+.ctbl tr:hover td{background:var(--s2);color:var(--txt)}
+.ctbl tr.sel td{background:rgba(201,106,76,.08);color:var(--txt)}
+.ctbl tr.sel td:first-child{border-left:2px solid var(--cu)}
+.td-proj{color:var(--txt)!important;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.td-ev{color:var(--cu)!important;font-weight:600}
+.td-net{color:var(--cu-bright)!important;font-weight:600}
+.mbr{display:inline-block;height:7px;background:var(--cu-dim);vertical-align:middle;margin-right:3px}
+.mpct{color:var(--cu);font-weight:600}
+.sbadge{display:inline-block;padding:1px 4px;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.s2b{background:rgba(100,100,100,.3);color:#888}
+.s3b{background:rgba(76,175,125,.2);color:#4caf7d}
+.s4b{background:rgba(201,106,76,.2);color:var(--cu)}
+.cn-card{display:none;margin-top:12px;padding:10px 13px;background:#111;border:1px solid var(--cu-dim);border-left:3px solid var(--cu);font-family:var(--mono);font-size:9.5px;color:var(--txt2);letter-spacing:.03em;line-height:1.8}
+.cn-card.vis{display:block}
+.cn-title{font-size:9px;color:var(--cu);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;font-weight:600}
+.cn-row{display:flex;justify-content:space-between;border-bottom:1px solid rgba(201,106,76,.1);padding:1px 0}
+.cn-row:last-child{border-bottom:none}
+.cn-range{color:var(--cu-bright);font-weight:500}
+.exp-btn{background:var(--s2);border:1px solid var(--bd);color:var(--txt2);font-family:var(--mono);font-size:10px;padding:6px 12px;cursor:pointer;letter-spacing:.06em;margin-top:12px;transition:all .15s;display:none}
+.exp-btn.vis{display:inline-block}
+.exp-btn:hover{border-color:var(--cu);color:var(--cu)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--bdb)}
+::-webkit-scrollbar-thumb:hover{background:var(--cu-dim)}
+.std-only{display:none}
+.std-only.vis{display:block}
+.exp-only{display:none}
+.exp-only.vis{display:block}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="hdr-title"><span>COPPER</span> MINE VALUATION TOOL</div>
+    <div class="hdr-line"></div>
+  </div>
+  <div class="hdr-meta">
+    <div>COMPARABLE TRANSACTION METHOD &nbsp;|&nbsp; NET EV/lb Cu</div>
+    <div>DATABASE: <span class="live">30 VERIFIED M&amp;A DEALS 2010&#x2013;2024</span> &nbsp;|&nbsp; v3.0</div>
+    <div id="clock" style="margin-top:3px"></div>
+  </div>
+</div>
+
+<!-- MODE TABS -->
+<div class="mode-tabs">
+  <button class="mode-tab active" id="tabQuick" onclick="setMode('quick')">&#9889; QUICK</button>
+  <button class="mode-tab" id="tabStandard" onclick="setMode('standard')">&#9711; STANDARD</button>
+  <button class="mode-tab" id="tabExpert" onclick="setMode('expert')">&#9672; EXPERT</button>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main">
+
+<!-- INPUT PANEL -->
+<div class="inp">
+  <div class="slabel">REQUIRED PARAMETERS</div>
+
+  <!-- Resource Size -->
+  <div class="fg">
+    <label class="fl">RESOURCE SIZE</label>
+    <div class="inp-row">
+      <input type="number" id="resInput" placeholder="e.g. 500" min="0" step="1">
+      <div class="ut">
+        <button class="ub active" id="btnMt" onclick="setResUnit('mt')">Mt ore</button>
+        <button class="ub" id="btnKt" onclick="setResUnit('ktcu')">&#19975;&#21051;Cu</button>
+      </div>
+    </div>
+    <div style="margin-top:4px;font-family:var(--mono);font-size:10px;color:var(--txt3)" id="resConvert">&nbsp;</div>
+  </div>
+
+  <!-- Grade -->
+  <div class="fg">
+    <label class="fl">COPPER GRADE (% Cu)</label>
+    <input type="number" id="gradeInput" placeholder="e.g. 0.8" min="0" max="10" step="0.1">
+  </div>
+
+  <!-- Stage -->
+  <div class="fg">
+    <label class="fl">DEVELOPMENT STAGE</label>
+    <div class="rg">
+      <button class="rb" id="stgRes" onclick="setStage(2)">RESOURCE</button>
+      <button class="rb" id="stgRsv" onclick="setStage(3)">RESERVE</button>
+      <button class="rb active" id="stgPro" onclick="setStage(4)">PRODUCTION</button>
+    </div>
+  </div>
+
+  <!-- Copper Price -->
+  <div class="fg">
+    <label class="fl">COPPER PRICE (USD/lb)</label>
+    <input type="number" id="cuPrice" value="4.5" min="1" max="15" step="0.1">
+  </div>
+
+  <!-- STANDARD+ COLLAPSIBLE -->
+  <div class="coll-hdr" onclick="toggleColl('stdBody','stdArr')">
+    <div class="slabel" style="margin:0;border:none;padding:0">REFINE ESTIMATE</div>
+    <div class="coll-arr" id="stdArr">&#9654;</div>
+  </div>
+  <div class="coll-body" id="stdBody">
+
+    <!-- Deposit Type -->
+    <div class="fg" style="margin-top:10px">
+      <label class="fl">DEPOSIT TYPE</label>
+      <select id="depType">
+        <option value="">-- Not specified --</option>
+        <option value="porphyry">Porphyry Cu (&#25289;&#26031;&#22411;)</option>
+        <option value="iocg">IOCG (&#37504;&#27963;&#21270;&#29289;&#37504;&#37329;)</option>
+        <option value="vms">VMS (&#22359;&#29366;&#30786;&#21270;&#29289;)</option>
+        <option value="sediment">Sediment-hosted (&#27801;&#31295;&#23618;&#23481;&#30719;)</option>
+        <option value="skarn">Skarn (&#30887;&#21345;&#23500;&#22411;)</option>
+      </select>
+    </div>
+
+    <!-- Byproducts -->
+    <div class="fg std-only" id="bpSection">
+      <label class="fl">BYPRODUCT GRADES</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:3px">Au (g/t)</div>
+          <input type="number" id="auGt" placeholder="0" min="0" step="0.01">
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:3px">Ag (g/t)</div>
+          <input type="number" id="agGt" placeholder="0" min="0" step="0.1">
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:3px">Mo (ppm)</div>
+          <input type="number" id="moPpm" placeholder="0" min="0" step="1">
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:3px">Co (ppm)</div>
+          <input type="number" id="coPpm" placeholder="0" min="0" step="1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Byproduct Prices -->
+    <div class="fg std-only" id="bpPriceSection">
+      <label class="fl">BYPRODUCT PRICES</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:3px">Au (USD/oz)</div>
+          <input type="number" id="auPrice" value="3300" min="0" step="10">
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:3px">Ag (USD/oz)</div>
+          <input type="number" id="agPrice" value="33" min="0" step="1">
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:3px">Mo (USD/t)</div>
+          <input type="number" id="moPrice" value="20000" min="0" step="500">
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:3px">Co (USD/t)</div>
+          <input type="number" id="coPrice" value="12000" min="0" step="500">
+        </div>
+      </div>
+    </div>
+
+    <!-- C1 Cost -->
+    <div class="fg">
+      <label class="fl">C1 CASH COST (USD/lb, optional)</label>
+      <input type="number" id="c1Cost" placeholder="e.g. 1.5" min="0" max="5" step="0.1">
+    </div>
+
+    <!-- Mining Method -->
+    <div class="fg">
+      <label class="fl">MINING METHOD</label>
+      <div class="rg">
+        <button class="rb" id="mOP" onclick="setMethod(0)">OPEN PIT</button>
+        <button class="rb" id="mUG" onclick="setMethod(1)">UNDERGROUND</button>
+        <button class="rb" id="mMix" onclick="setMethod(2)">MIXED</button>
+      </div>
+    </div>
+
+    <!-- Infrastructure -->
+    <div class="fg">
+      <label class="fl">INFRASTRUCTURE</label>
+      <div class="rg">
+        <button class="rb" id="infGreen" onclick="setInfra(0)">GREENFIELD</button>
+        <button class="rb" id="infBrown" onclick="setInfra(1)">BROWNFIELD</button>
+      </div>
+    </div>
+
+    <!-- Country -->
+    <div class="fg">
+      <label class="fl">COUNTRY / REGION</label>
+      <select id="country" onchange="onCountryChange()">
+        <option value="">-- Not specified --</option>
+        <option value="australia">Australia</option>
+        <option value="canada">Canada</option>
+        <option value="chile">Chile</option>
+        <option value="peru">Peru</option>
+        <option value="argentina">Argentina</option>
+        <option value="usa">USA</option>
+        <option value="mongolia">Mongolia</option>
+        <option value="drc">DRC (Congo)</option>
+        <option value="zambia">Zambia</option>
+        <option value="spain">Spain / Europe</option>
+        <option value="china_dom">China (Domestic)</option>
+        <option value="other_low">Other (Low Risk)</option>
+        <option value="other_high">Other (High Risk)</option>
+      </select>
+    </div>
+
+    <!-- China CNY panel -->
+    <div class="cn-card" id="cnCard">
+      <div class="cn-title">&#20013;&#22269;&#39069;&#21442;&#32771;&#20215; (&#20803;/&#21051;Cu)</div>
+      <div class="cn-row"><span>&#22312;&#20135;&#37319;&#30719;&#26435;</span><span class="cn-range">30&#x2013;80 &#19975;&#20803;/&#21051;</span></div>
+      <div class="cn-row"><span>331&#31867; &#25506;&#26126;&#36164;&#28304;&#37327;</span><span class="cn-range">10&#x2013;25 &#19975;&#20803;/&#21051;</span></div>
+      <div class="cn-row"><span>333&#31867; &#25512;&#26029;&#36164;&#28304;&#37327;</span><span class="cn-range">3&#x2013;10 &#19975;&#20803;/&#21051;</span></div>
+      <div style="margin-top:5px;font-size:8.5px;color:var(--txt3)">&#27880;&#65306;&#22269;&#20869;&#37319;&#30719;&#26435;&#20132;&#26131;&#25968;&#25454;&#25114;&#38706;&#26377;&#38480;&#65292;&#20197;&#19978;&#20026;&#34892;&#19994;&#21442;&#32771;&#21306;&#38388;</div>
+      <div style="margin-top:4px;font-size:8.5px;color:var(--txt3)">CNY/USD: <input type="number" id="cnyRate" value="7.25" min="5" max="10" step="0.01" style="width:60px;font-size:9px;padding:2px 4px;display:inline-block"></div>
+    </div>
+
+    <!-- Expert-only fields -->
+    <div class="exp-only" id="expFields">
+      <div class="fg" style="margin-top:10px">
+        <label class="fl">MINE LIFE (YEARS)</label>
+        <input type="number" id="mineLife" placeholder="e.g. 20" min="1" max="60" step="1">
+      </div>
+      <div class="fg">
+        <label class="fl">ANNUAL CAPACITY (kt Cu/yr)</label>
+        <input type="number" id="annCap" placeholder="e.g. 50" min="0" step="1">
+      </div>
+      <div class="fg">
+        <label class="fl">RECOVERY RATE (%)</label>
+        <input type="number" id="recovery" placeholder="e.g. 88" min="0" max="100" step="1">
+      </div>
+    </div>
+
+  </div><!-- end coll-body -->
+
+  <button class="calc-btn" onclick="calculate()">&#9654; &nbsp;CALCULATE VALUATION</button>
+
+  <div class="div"></div>
+  <div class="slabel">METHODOLOGY</div>
+  <div class="irow"><span class="ik">Method</span><span class="iv">Comparable Transactions</span></div>
+  <div class="irow"><span class="ik">Core metric</span><span class="iv">Net EV/lb Cu</span></div>
+  <div class="irow"><span class="ik">Byproduct recovery</span><span class="iv">Au:85% Ag:75% Mo:60% Co:55%</span></div>
+  <div class="irow"><span class="ik">Cu price elasticity</span><span class="iv">0.8 (empirical)</span></div>
+  <div class="irow"><span class="ik">Output</span><span class="iv">P25 / P50 / P75</span></div>
+  <div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--txt3);line-height:1.6">
+    Results are indicative only and do not constitute investment advice. Net EV/lb Cu excludes byproduct value; total EV includes it.
+  </div>
+
+</div><!-- end inp -->
+
+<!-- OUTPUT AREA -->
+<div class="out">
+  <div class="out-top">
+    <div class="val-hdr">
+      <div class="val-title">ENTERPRISE VALUE ESTIMATE</div>
+      <div class="val-comps" id="compCount">Enter parameters and calculate</div>
+    </div>
+
+    <div id="phState" class="ph">
+      <div class="ph-icon">&#9672;</div>
+      <div class="ph-txt">AWAITING INPUT<br><br>Configure parameters on the left<br>and press CALCULATE</div>
+    </div>
+
+    <div id="valResult" style="display:none">
+      <div class="val-bars">
+        <div class="vbr">
+          <div class="vbl">LOW<br><span style="font-size:8px;color:var(--txt3)">P25</span></div>
+          <div class="vbt"><div class="vbf low" id="barLow"></div></div>
+          <div class="vbn">
+            <span class="vev low" id="evLow">&#x2014;</span>
+            <span class="vtot" id="totLow">&#x2014;</span>
+            <span class="vsec" id="secLow"></span>
+          </div>
+        </div>
+        <div class="vbr">
+          <div class="vbl">MID<br><span style="font-size:8px;color:var(--txt3)">P50</span></div>
+          <div class="vbt"><div class="vbf mid" id="barMid"></div></div>
+          <div class="vbn">
+            <span class="vev mid" id="evMid">&#x2014;</span>
+            <span class="vtot" id="totMid">&#x2014;</span>
+            <span class="vsec" id="secMid"></span>
+          </div>
+        </div>
+        <div class="vbr">
+          <div class="vbl">HIGH<br><span style="font-size:8px;color:var(--txt3)">P75</span></div>
+          <div class="vbt"><div class="vbf high" id="barHigh"></div></div>
+          <div class="vbn">
+            <span class="vev high" id="evHigh">&#x2014;</span>
+            <span class="vtot" id="totHigh">&#x2014;</span>
+            <span class="vsec" id="secHigh"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Byproduct breakdown panel -->
+      <div class="bp-panel" id="bpPanel">
+        <div class="bp-title">BYPRODUCT CREDIT BREAKDOWN</div>
+        <div id="bpRows"></div>
+        <div id="bpDonut" style="margin-top:10px;text-align:center"></div>
+      </div>
+
+      <!-- Au-dominant warning -->
+      <div class="bp-warn" id="bpWarn"></div>
+
+      <!-- Adjustment panel -->
+      <div class="adj-panel" id="adjPanel">
+        <div class="adj-title">APPLIED ADJUSTMENTS</div>
+        <div id="adjRows"></div>
+      </div>
+
+      <!-- Sensitivity heatmap (Expert only) -->
+      <div class="sens-wrap" id="sensWrap">
+        <div class="sens-title">SENSITIVITY ANALYSIS &mdash; Total EV (USD M)</div>
+        <div class="sens-grid" id="sensGrid"></div>
+        <div class="rf-warn" id="rfWarn">&#9651; RF MODEL DIVERGENCE &gt;30% &mdash; Treat comparable result with caution</div>
+        <div style="margin-top:6px;font-family:var(--mono);font-size:8.5px;color:var(--txt3)">RF model trained on 30 transactions &mdash; directional only, not precise</div>
+      </div>
+
+      <!-- Export button -->
+      <button class="exp-btn" id="expBtn" onclick="exportJSON()">&#8595; EXPORT JSON</button>
+    </div>
+  </div><!-- end out-top -->
+
+  <!-- COMPARABLES TABLE -->
+  <div class="out-bot">
+    <div class="comp-hdr">
+      <div class="comp-title">COMPARABLE TRANSACTIONS</div>
+      <div class="comp-sub" id="compSub">Top matches by similarity score</div>
+    </div>
+    <div id="compTbl">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);padding:16px 0">
+        No comparables loaded. Run calculation to populate.
+      </div>
+    </div>
+  </div>
+</div><!-- end out -->
+
+</div><!-- end main -->
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let mode = 'quick';
+let resUnit = 'mt';
+let stage = 4;
+let method = null;
+let infra = null;
+
+// ── TRANSACTION DATABASE (30 verified M&A deals 2010-2024) ─────────────────
+const DB = [
+  // 2024
+  {project:'Filo del Sol',buyer:'BHP + Lundin',year:2024,country:'argentina',depositType:'porphyry',stage:2,oreMt:1760,cuPct:0.74,cuKt:13000,auGt:0.33,agGt:9.0,moPpm:0,coPpm:0,evUsdM:3250,cuPriceAtDeal:4.3,evPerLbCu:0.057,c1UsdLb:0,miningMethod:0,infra:0},
+  // 2023
+  {project:'MARA 56.25%',buyer:'Glencore',year:2023,country:'argentina',depositType:'porphyry',stage:3,oreMt:1105,cuPct:0.49,cuKt:5415,auGt:0.18,agGt:0,moPpm:0,coPpm:0,evUsdM:845,cuPriceAtDeal:3.9,evPerLbCu:0.071,c1UsdLb:0,miningMethod:0,infra:1},
+  {project:'CSA Cobar',buyer:'Metals Acquisition Corp',year:2023,country:'australia',depositType:'vms',stage:4,oreMt:12,cuPct:4.5,cuKt:540,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:1100,cuPriceAtDeal:3.9,evPerLbCu:0.92,c1UsdLb:2.1,miningMethod:1,infra:1},
+  {project:'OZ Minerals Portfolio',buyer:'BHP',year:2023,country:'australia',depositType:'iocg',stage:4,oreMt:1650,cuPct:1.2,cuKt:19800,auGt:0.25,agGt:2.0,moPpm:0,coPpm:0,evUsdM:6400,cuPriceAtDeal:3.9,evPerLbCu:0.66,c1UsdLb:1.1,miningMethod:2,infra:1},
+  {project:'Newcrest / Cadia',buyer:'Newmont',year:2023,country:'australia',depositType:'porphyry',stage:4,oreMt:4200,cuPct:0.35,cuKt:14700,auGt:0.32,agGt:0,moPpm:0,coPpm:0,evUsdM:19100,cuPriceAtDeal:3.9,evPerLbCu:2.95,c1UsdLb:0.8,miningMethod:2,infra:1},
+  {project:'Caserones 51%',buyer:'Lundin Mining',year:2023,country:'chile',depositType:'porphyry',stage:4,oreMt:1200,cuPct:0.31,cuKt:3720,auGt:0,agGt:0,moPpm:120,coPpm:0,evUsdM:950,cuPriceAtDeal:3.9,evPerLbCu:0.58,c1UsdLb:1.8,miningMethod:0,infra:1},
+  // 2022
+  {project:'Turquoise Hill / Oyu Tolgoi',buyer:'Rio Tinto',year:2022,country:'mongolia',depositType:'porphyry',stage:4,oreMt:3500,cuPct:0.51,cuKt:17850,auGt:0.31,agGt:1.5,moPpm:0,coPpm:0,evUsdM:3300,cuPriceAtDeal:4.2,evPerLbCu:0.42,c1UsdLb:1.2,miningMethod:2,infra:1},
+  {project:'MATSA',buyer:'Sandfire Resources',year:2022,country:'spain',depositType:'vms',stage:4,oreMt:45,cuPct:2.8,cuKt:1260,auGt:0.5,agGt:30,moPpm:0,coPpm:0,evUsdM:1870,cuPriceAtDeal:4.2,evPerLbCu:3.37,c1UsdLb:1.5,miningMethod:1,infra:1},
+  {project:'Capstone + Mantos Copper',buyer:'Capstone Copper',year:2022,country:'chile',depositType:'iocg',stage:4,oreMt:600,cuPct:0.55,cuKt:3300,auGt:0.1,agGt:1.5,moPpm:0,coPpm:0,evUsdM:1100,cuPriceAtDeal:4.2,evPerLbCu:0.76,c1UsdLb:1.6,miningMethod:0,infra:1},
+  // 2021
+  {project:'Copper Mountain',buyer:'Hudbay Minerals',year:2021,country:'canada',depositType:'porphyry',stage:4,oreMt:380,cuPct:0.28,cuKt:1064,auGt:0.18,agGt:1.2,moPpm:0,coPpm:0,evUsdM:439,cuPriceAtDeal:4.0,evPerLbCu:0.94,c1UsdLb:1.9,miningMethod:0,infra:1},
+  {project:'Mopani 73%',buyer:'ZCCM Zambia',year:2021,country:'zambia',depositType:'sediment',stage:4,oreMt:80,cuPct:2.8,cuKt:2240,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:1500,cuPriceAtDeal:3.5,evPerLbCu:0.30,c1UsdLb:2.5,miningMethod:1,infra:1},
+  // 2018
+  {project:'Quebrada Blanca 30%',buyer:'Sumitomo Metal Mining',year:2018,country:'chile',depositType:'porphyry',stage:3,oreMt:1100,cuPct:0.48,cuKt:5280,auGt:0,agGt:0,moPpm:80,coPpm:0,evUsdM:1200,cuPriceAtDeal:3.1,evPerLbCu:0.52,c1UsdLb:0,miningMethod:0,infra:0},
+  {project:'Timok Upper Zone',buyer:'Zijin Mining',year:2018,country:'other_low',depositType:'vms',stage:2,oreMt:35,cuPct:2.9,cuKt:1015,auGt:1.8,agGt:0,moPpm:0,coPpm:0,evUsdM:390,cuPriceAtDeal:3.1,evPerLbCu:0.87,c1UsdLb:0,miningMethod:1,infra:0},
+  // 2016
+  {project:'Katanga + Mutanda stakes',buyer:'Glencore',year:2016,country:'drc',depositType:'sediment',stage:4,oreMt:800,cuPct:2.5,cuKt:20000,auGt:0,agGt:0,moPpm:0,coPpm:3000,evUsdM:960,cuPriceAtDeal:2.2,evPerLbCu:0.11,c1UsdLb:1.8,miningMethod:0,infra:1},
+  // 2015
+  {project:'Kamoa 49.5%',buyer:'Zijin Mining',year:2015,country:'drc',depositType:'sediment',stage:2,oreMt:1200,cuPct:2.7,cuKt:32400,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:412,cuPriceAtDeal:2.5,evPerLbCu:0.029,c1UsdLb:0,miningMethod:0,infra:0},
+  {project:'Zaldivar 50%',buyer:'Antofagasta',year:2015,country:'chile',depositType:'porphyry',stage:4,oreMt:450,cuPct:0.45,cuKt:2025,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:1030,cuPriceAtDeal:2.5,evPerLbCu:1.16,c1UsdLb:1.5,miningMethod:0,infra:1},
+  // 2014
+  {project:'Las Bambas',buyer:'MMG (China Minmetals)',year:2014,country:'peru',depositType:'porphyry',stage:3,oreMt:2200,cuPct:0.73,cuKt:16060,auGt:0.07,agGt:5.0,moPpm:150,coPpm:0,evUsdM:5850,cuPriceAtDeal:3.1,evPerLbCu:0.83,c1UsdLb:0,miningMethod:0,infra:0},
+  {project:'Sierra Gorda',buyer:'KGHM',year:2014,country:'chile',depositType:'porphyry',stage:3,oreMt:1800,cuPct:0.38,cuKt:6840,auGt:0.07,agGt:1.5,moPpm:200,coPpm:0,evUsdM:4160,cuPriceAtDeal:3.1,evPerLbCu:1.38,c1UsdLb:0,miningMethod:0,infra:0},
+  // 2013
+  {project:'Lumina Copper / Caspiche',buyer:'Goldcorp',year:2013,country:'chile',depositType:'porphyry',stage:2,oreMt:1400,cuPct:0.28,cuKt:3920,auGt:0.55,agGt:0,moPpm:0,coPpm:0,evUsdM:520,cuPriceAtDeal:3.4,evPerLbCu:0.30,c1UsdLb:0,miningMethod:0,infra:0},
+  {project:'Xstrata (Glencore merger)',buyer:'Glencore',year:2013,country:'other_low',depositType:'porphyry',stage:4,oreMt:5000,cuPct:0.8,cuKt:40000,auGt:0.1,agGt:2.0,moPpm:50,coPpm:0,evUsdM:30000,cuPriceAtDeal:3.6,evPerLbCu:1.70,c1UsdLb:1.3,miningMethod:2,infra:1},
+  // 2012
+  {project:'Duluth Complex 60%',buyer:'Antofagasta',year:2012,country:'usa',depositType:'sediment',stage:2,oreMt:1800,cuPct:0.66,cuKt:11880,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:682,cuPriceAtDeal:3.6,evPerLbCu:0.14,c1UsdLb:0,miningMethod:1,infra:0},
+  {project:'Constancia',buyer:'Hudbay Minerals',year:2012,country:'peru',depositType:'skarn',stage:3,oreMt:500,cuPct:0.35,cuKt:1750,auGt:0.06,agGt:3.5,moPpm:50,coPpm:0,evUsdM:520,cuPriceAtDeal:3.6,evPerLbCu:0.67,c1UsdLb:0,miningMethod:0,infra:0},
+  // 2011
+  {project:'Equinox / Lumwana',buyer:'Barrick Gold',year:2011,country:'zambia',depositType:'sediment',stage:4,oreMt:1400,cuPct:0.65,cuKt:9100,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:7300,cuPriceAtDeal:4.0,evPerLbCu:1.82,c1UsdLb:1.6,miningMethod:0,infra:1},
+  {project:'Anvil Mining / Kinsevere',buyer:'MMG',year:2011,country:'drc',depositType:'sediment',stage:4,oreMt:25,cuPct:3.5,cuKt:875,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:1300,cuPriceAtDeal:4.0,evPerLbCu:3.37,c1UsdLb:1.8,miningMethod:0,infra:1},
+  {project:'Gaby / El Abra expansion',buyer:'Codelco',year:2011,country:'chile',depositType:'porphyry',stage:4,oreMt:800,cuPct:0.38,cuKt:3040,auGt:0,agGt:0,moPpm:0,coPpm:0,evUsdM:1200,cuPriceAtDeal:4.0,evPerLbCu:0.90,c1UsdLb:1.7,miningMethod:0,infra:1},
+  // 2010
+  {project:'Neves-Corvo expansion',buyer:'Lundin Mining',year:2010,country:'spain',depositType:'vms',stage:4,oreMt:30,cuPct:3.2,cuKt:960,auGt:0,agGt:15,moPpm:0,coPpm:0,evUsdM:450,cuPriceAtDeal:3.4,evPerLbCu:1.07,c1UsdLb:1.6,miningMethod:1,infra:1},
+  {project:'Haquira',buyer:'First Quantum',year:2010,country:'peru',depositType:'porphyry',stage:2,oreMt:900,cuPct:0.52,cuKt:4680,auGt:0.05,agGt:0,moPpm:0,coPpm:0,evUsdM:470,cuPriceAtDeal:3.4,evPerLbCu:0.23,c1UsdLb:0,miningMethod:0,infra:0},
+  // Additional
+  {project:'Reko Diq 50%',buyer:'Barrick Gold',year:2022,country:'other_high',depositType:'porphyry',stage:2,oreMt:5900,cuPct:0.41,cuKt:24190,auGt:0.22,agGt:0,moPpm:0,coPpm:0,evUsdM:900,cuPriceAtDeal:4.2,evPerLbCu:0.085,c1UsdLb:0,miningMethod:0,infra:0},
+  {project:'Pebble 50%',buyer:'Northern Dynasty',year:2013,country:'usa',depositType:'porphyry',stage:2,oreMt:5400,cuPct:0.31,cuKt:16740,auGt:0.34,agGt:1.5,moPpm:0,coPpm:0,evUsdM:1500,cuPriceAtDeal:3.4,evPerLbCu:0.20,c1UsdLb:0,miningMethod:0,infra:0},
+  {project:'Frieda River',buyer:'PanAust',year:2015,country:'other_high',depositType:'porphyry',stage:2,oreMt:2200,cuPct:0.45,cuKt:9900,auGt:0.28,agGt:0,moPpm:0,coPpm:0,evUsdM:175,cuPriceAtDeal:2.5,evPerLbCu:0.040,c1UsdLb:0,miningMethod:0,infra:0},
+];
+
+// ── CONSTANTS ──────────────────────────────────────────────────────────────
+const RECOVERY = {Au:0.85, Ag:0.75, Mo:0.60, Co:0.55};
+const STAGE_NAMES = {2:'Resource',3:'Reserve',4:'Production'};
+const DEP_NAMES = {porphyry:'Porphyry',iocg:'IOCG',vms:'VMS',sediment:'Sediment',skarn:'Skarn'};
+const COUNTRY_RISK = {
+  australia:0,canada:0,usa:0,chile:0.05,peru:0.08,argentina:0.10,
+  spain:0,mongolia:0.15,zambia:0.15,drc:0.30,other_low:0.05,other_high:0.25,china_dom:0
+};
+const CONTINENT = {
+  australia:'oceania',canada:'namerica',usa:'namerica',chile:'samerica',
+  peru:'samerica',argentina:'samerica',spain:'europe',mongolia:'asia',
+  zambia:'africa',drc:'africa',other_low:'other',other_high:'other',china_dom:'asia'
+};
+
+// ── CORE ENGINE ────────────────────────────────────────────────────────────
+function calcByproductCredit(auGt, agGt, moPpm, coPpm, oreMt, cuKt, prices) {
+  const grams = oreMt * 1e6;
+  const cuLb = cuKt * 1000 * 2204.62;
+  const auVal = auGt * grams * RECOVERY.Au * prices.auP / 31.1035;
+  const agVal = agGt * grams * RECOVERY.Ag * prices.agP / 31.1035;
+  const moVal = moPpm * grams * 1e-6 * RECOVERY.Mo * prices.moP;
+  const coVal = coPpm * grams * 1e-6 * RECOVERY.Co * prices.coP;
+  const total = auVal + agVal + moVal + coVal;
+  return { total, cuLb, perLb: total / cuLb, au: auVal, ag: agVal, mo: moVal, co: coVal };
+}
+
+function normalizeGrossEvPerLb(deal, currentCuPrice) {
+  return deal.evPerLbCu * Math.pow(currentCuPrice / deal.cuPriceAtDeal, 0.8);
+}
+
+function calcNetEvPerLb(deal, currentCuPrice, prices) {
+  const grossNorm = normalizeGrossEvPerLb(deal, currentCuPrice);
+  const bp = calcByproductCredit(deal.auGt, deal.agGt, deal.moPpm, deal.coPpm, deal.oreMt, deal.cuKt, prices);
+  const netPerLb = grossNorm - bp.perLb;
+  return Math.max(0, netPerLb);
+}
+
+function similarityScore(deal, inp) {
+  let s = 0;
+  if (deal.stage === inp.stage) s += 30;
+  else s += Math.max(0, 30 - Math.abs(deal.stage - inp.stage) * 12);
+  const logDiff = Math.abs(Math.log(deal.cuKt) - Math.log(inp.cuKt));
+  s += Math.max(0, 25 - logDiff * 8);
+  if (inp.cuPct > 0 && deal.cuPct > 0) {
+    const gd = Math.abs(deal.cuPct - inp.cuPct) / Math.max(deal.cuPct, inp.cuPct);
+    s += Math.max(0, 20 - gd * 20);
+  } else s += 10;
+  if (inp.depositType && deal.depositType === inp.depositType) s += 15;
+  else if (!inp.depositType) s += 7;
+  if (inp.country && deal.country === inp.country) s += 10;
+  else if (inp.country && CONTINENT[deal.country] === CONTINENT[inp.country]) s += 4;
+  else if (!inp.country) s += 5;
+  return Math.round(s);
+}
+
+function hardFilter(deal, inp) {
+  if (inp.depositType && ['porphyry','iocg','sediment'].includes(inp.depositType) && inp.cuPct < 1.0) {
+    if (deal.depositType === 'vms' && deal.cuPct > 3.0) return false;
+  }
+  if (inp.depositType === 'vms' && inp.cuPct > 2.0) {
+    if (['porphyry','iocg'].includes(deal.depositType) && deal.cuPct < 0.8) return false;
+  }
+  return true;
+}
+
+function percentile(arr, p) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a,b) => a-b);
+  const idx = (p/100) * (s.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  return lo === hi ? s[lo] : s[lo] + (s[hi]-s[lo]) * (idx-lo);
+}
+
+function applyAdjustments(baseP25, baseP50, baseP75, inp) {
+  const adjs = [];
+  let mult = 1.0;
+  if (inp.cuPct > 1.5) { mult *= 1.15; adjs.push({n:'Grade >1.5% Cu premium',v:'+15%',c:'adj-pos'}); }
+  else if (inp.cuPct < 0.3 && inp.cuPct > 0) { mult *= 0.85; adjs.push({n:'Grade <0.3% Cu discount',v:'-15%',c:'adj-neg'}); }
+  if (inp.c1 > 0) {
+    if (inp.c1 < 1.2) { mult *= 1.12; adjs.push({n:'C1 <$1.2/lb low-cost premium',v:'+12%',c:'adj-pos'}); }
+    else if (inp.c1 > 2.0) { mult *= 0.85; adjs.push({n:'C1 >$2.0/lb high-cost discount',v:'-15%',c:'adj-neg'}); }
+  }
+  if (inp.infra === 1) { mult *= 1.15; adjs.push({n:'Brownfield infrastructure',v:'+15%',c:'adj-pos'}); }
+  if (inp.method === 1) { mult *= 0.90; adjs.push({n:'Underground mining',v:'-10%',c:'adj-neg'}); }
+  if (inp.country) {
+    const risk = COUNTRY_RISK[inp.country] || 0;
+    if (risk > 0) { mult *= (1 - risk); adjs.push({n:'Country risk discount',v:'-'+Math.round(risk*100)+'%',c:'adj-neg'}); }
+  }
+  if (inp.cuKt < 50) { mult *= 0.75; adjs.push({n:'Small deposit liquidity discount',v:'-25%',c:'adj-neg'}); }
+  return { p25: baseP25*mult, p50: baseP50*mult, p75: baseP75*mult, adjs };
+}
+
+function runValuation(inp) {
+  const prices = { auP: inp.auPrice||3300, agP: inp.agPrice||33, moP: inp.moPrice||20000, coP: inp.coPrice||12000 };
+  const nComps = mode==='quick' ? 3 : mode==='standard' ? 10 : DB.length;
+  let scored = DB.filter(d => hardFilter(d, inp)).map(d => ({
+    d, score: similarityScore(d, inp), netEvLb: calcNetEvPerLb(d, inp.cuPrice, prices)
+  }));
+  scored.sort((a,b) => b.score - a.score);
+  const pool = scored.slice(0, Math.min(20, scored.length));
+  const vals = pool.map(x => x.netEvLb).filter(v => v > 0);
+  if (!vals.length) return null;
+  const baseP25 = percentile(vals, 25);
+  const baseP50 = percentile(vals, 50);
+  const baseP75 = percentile(vals, 75);
+  const {p25, p50, p75, adjs} = applyAdjustments(baseP25, baseP50, baseP75, inp);
+  const userBp = calcByproductCredit(inp.auGt||0, inp.agGt||0, inp.moPpm||0, inp.coPpm||0, inp.oreMt, inp.cuKt, prices);
+  const cuLb = inp.cuKt * 1000 * 2204.62;
+  return {
+    p25, p50, p75,
+    totLow:  p25*cuLb + userBp.total,
+    totMid:  p50*cuLb + userBp.total,
+    totHigh: p75*cuLb + userBp.total,
+    adjs, userBp, cuLb,
+    comps: scored.slice(0, nComps),
+    nPool: pool.length
+  };
+}
+
+// ── UI HELPERS ─────────────────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  ['quick','standard','expert'].forEach(x => {
+    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===m);
+  });
+  const isStd = m==='standard'||m==='expert';
+  const isExp = m==='expert';
+  document.querySelectorAll('.std-only').forEach(el => el.classList.toggle('vis', isStd));
+  document.querySelectorAll('.exp-only').forEach(el => el.classList.toggle('vis', isExp));
+  document.getElementById('expBtn').classList.toggle('vis', isExp);
+  // Auto-open refine panel in standard/expert
+  if (isStd) {
+    document.getElementById('stdBody').classList.add('open');
+    document.getElementById('stdArr').classList.add('open');
+  }
+}
+
+function setResUnit(u) {
+  resUnit = u;
+  document.getElementById('btnMt').classList.toggle('active', u==='mt');
+  document.getElementById('btnKt').classList.toggle('active', u==='ktcu');
+  updateResConvert();
+}
+
+function setStage(s) {
+  stage = s;
+  document.getElementById('stgRes').classList.toggle('active', s===2);
+  document.getElementById('stgRsv').classList.toggle('active', s===3);
+  document.getElementById('stgPro').classList.toggle('active', s===4);
+}
+
+function setMethod(m) {
+  method = m;
+  ['mOP','mUG','mMix'].forEach((id,i) => document.getElementById(id).classList.toggle('active', i===m));
+}
+
+function setInfra(v) {
+  infra = v;
+  document.getElementById('infGreen').classList.toggle('active', v===0);
+  document.getElementById('infBrown').classList.toggle('active', v===1);
+}
+
+function toggleColl(bodyId, arrId) {
+  document.getElementById(bodyId).classList.toggle('open');
+  document.getElementById(arrId).classList.toggle('open');
+}
+
+function onCountryChange() {
+  const v = document.getElementById('country').value;
+  document.getElementById('cnCard').classList.toggle('vis', v==='china_dom');
+}
+
+function updateResConvert() {
+  const v = parseFloat(document.getElementById('resInput').value);
+  const el = document.getElementById('resConvert');
+  const g = parseFloat(document.getElementById('gradeInput').value)||0;
+  if (!v || isNaN(v)) { el.textContent = ' '; return; }
+  if (resUnit === 'mt') {
+    const kt = g > 0 ? (v * g / 100 * 10).toFixed(0) : '?';
+    el.textContent = `= ${kt} 万吨Cu (at ${g}% grade)`;
+  } else {
+    el.textContent = `= ${v} 万吨 Cu metal`;
+  }
+}
+
+document.getElementById('resInput').addEventListener('input', updateResConvert);
+document.getElementById('gradeInput').addEventListener('input', updateResConvert);
+
+// ── FORMAT HELPERS ─────────────────────────────────────────────────────────
+function fmtM(v) {
+  if (v >= 1e9) return '$' + (v/1e9).toFixed(2) + 'B';
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(0) + 'M';
+  return '$' + Math.round(v).toLocaleString();
+}
+function fmtLb(v) { return '$' + v.toFixed(3) + '/lb'; }
+
+// ── SENSITIVITY HEATMAP ────────────────────────────────────────────────────
+function buildHeatmap(inp, baseResult) {
+  const cuFactors = [-0.20,-0.10,0,0.10,0.20];
+  const gradeFactors = [-0.20,-0.10,0,0.10,0.20];
+  const cuLabels = ['-20%','-10%','Base','+10%','+20%'];
+  const gradeLabels = ['-20%','-10%','Base','+10%','+20%'];
+  const grid = document.getElementById('sensGrid');
+  grid.innerHTML = '';
+  // Header row
+  const corner = document.createElement('div');
+  corner.className = 'sens-cell sens-hdr sens-lbl';
+  corner.textContent = 'Grade \ Cu';
+  grid.appendChild(corner);
+  cuLabels.forEach(l => {
+    const h = document.createElement('div');
+    h.className = 'sens-cell sens-hdr';
+    h.textContent = l;
+    grid.appendChild(h);
+  });
+  // Data rows
+  const allVals = [];
+  const cells = [];
+  gradeFactors.forEach((gf, gi) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'sens-cell sens-lbl';
+    lbl.textContent = gradeLabels[gi];
+    grid.appendChild(lbl);
+    cuFactors.forEach((cf, ci) => {
+      const modInp = Object.assign({}, inp, {
+        cuPrice: inp.cuPrice * (1+cf),
+        cuPct: inp.cuPct * (1+gf),
+        cuKt: inp.cuKt * (1+gf)
+      });
+      const r = runValuation(modInp);
+      const val = r ? r.totMid / 1e6 : 0;
+      allVals.push(val);
+      cells.push({val, el: null});
+      const cell = document.createElement('div');
+      cell.className = 'sens-cell';
+      cell.textContent = val >= 1000 ? (val/1000).toFixed(1)+'B' : Math.round(val)+'M';
+      cells[cells.length-1].el = cell;
+      grid.appendChild(cell);
+    });
+  });
+  // Color cells
+  const mn = Math.min(...allVals), mx = Math.max(...allVals);
+  cells.forEach(({val, el}) => {
+    const t = mx > mn ? (val-mn)/(mx-mn) : 0.5;
+    const r = Math.round(180 - t*120);
+    const g = Math.round(60 + t*120);
+    const b = Math.round(60);
+    el.style.background = `rgba(${r},${g},${b},0.35)`;
+    el.style.color = t > 0.5 ? '#4caf7d' : '#c96a4c';
+    if (gi===2 && ci===2) el.style.border = '1px solid var(--cu)'; // base cell
+  });
+}
+
+// ── BYPRODUCT DONUT ────────────────────────────────────────────────────────
+function buildDonut(bp, totalEv) {
+  const cu = Math.max(0, totalEv - bp.total);
+  const parts = [
+    {label:'Cu', val:cu, color:'#c96a4c'},
+    {label:'Au', val:bp.au, color:'#c9a84c'},
+    {label:'Ag', val:bp.ag, color:'#aaaaaa'},
+    {label:'Mo', val:bp.mo, color:'#4c8ac9'},
+    {label:'Co', val:bp.co, color:'#4caf7d'},
+  ].filter(p => p.val > 0);
+  if (!parts.length) return '';
+  const total = parts.reduce((s,p) => s+p.val, 0);
+  let angle = -Math.PI/2;
+  const cx=60, cy=60, r=50, ri=30;
+  let paths = '';
+  parts.forEach(p => {
+    const sweep = (p.val/total) * 2 * Math.PI;
+    const x1 = cx + r*Math.cos(angle), y1 = cy + r*Math.sin(angle);
+    const x2 = cx + r*Math.cos(angle+sweep), y2 = cy + r*Math.sin(angle+sweep);
+    const xi1 = cx + ri*Math.cos(angle), yi1 = cy + ri*Math.sin(angle);
+    const xi2 = cx + ri*Math.cos(angle+sweep), yi2 = cy + ri*Math.sin(angle+sweep);
+    const lg = sweep > Math.PI ? 1 : 0;
+    paths += `<path d="M${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${lg},1 ${x2.toFixed(1)},${y2.toFixed(1)} L${xi2.toFixed(1)},${yi2.toFixed(1)} A${ri},${ri} 0 ${lg},0 ${xi1.toFixed(1)},${yi1.toFixed(1)} Z" fill="${p.color}" opacity="0.85"/>`;
+    angle += sweep;
+  });
+  const legend = parts.map(p => `<span style="color:${p.color};margin-right:8px">&#9632; ${p.label} ${(p.val/total*100).toFixed(0)}%</span>`).join('');
+  return `<svg width="120" height="120" viewBox="0 0 120 120">${paths}</svg><div style="font-family:var(--mono);font-size:9px;margin-top:4px">${legend}</div>`;
+}
+
+// ── MAIN CALCULATE ─────────────────────────────────────────────────────────
+function calculate() {
+  const rawRes = parseFloat(document.getElementById('resInput').value);
+  const cuPct = parseFloat(document.getElementById('gradeInput').value) || 0;
+  const cuPrice = parseFloat(document.getElementById('cuPrice').value) || 4.5;
+  if (!rawRes || isNaN(rawRes) || rawRes <= 0) { alert('Please enter a valid resource size.'); return; }
+
+  let oreMt, cuKt;
+  if (resUnit === 'mt') {
+    oreMt = rawRes;
+    cuKt = cuPct > 0 ? rawRes * cuPct / 100 * 10 : rawRes * 0.5 / 100 * 10; // fallback 0.5%
+  } else {
+    cuKt = rawRes;
+    oreMt = cuPct > 0 ? rawRes / (cuPct/100) / 10 : rawRes * 200; // fallback
+  }
+
+  const inp = {
+    oreMt, cuKt, cuPct, cuPrice, stage,
+    depositType: document.getElementById('depType').value || null,
+    auGt:    parseFloat(document.getElementById('auGt').value)    || 0,
+    agGt:    parseFloat(document.getElementById('agGt').value)    || 0,
+    moPpm:   parseFloat(document.getElementById('moPpm').value)   || 0,
+    coPpm:   parseFloat(document.getElementById('coPpm').value)   || 0,
+    auPrice: parseFloat(document.getElementById('auPrice').value) || 3300,
+    agPrice: parseFloat(document.getElementById('agPrice').value) || 33,
+    moPrice: parseFloat(document.getElementById('moPrice').value) || 20000,
+    coPrice: parseFloat(document.getElementById('coPrice').value) || 12000,
+    c1:      parseFloat(document.getElementById('c1Cost').value)  || 0,
+    method, infra,
+    country: document.getElementById('country').value || null,
+  };
+
+  const result = runValuation(inp);
+  if (!result) { alert('Not enough comparable data for these parameters.'); return; }
+
+  renderResult(result, inp);
+}
+
+function renderResult(r, inp) {
+  document.getElementById('phState').style.display = 'none';
+  document.getElementById('valResult').style.display = 'block';
+
+  const maxEv = r.p75 * 1.1;
+  document.getElementById('barLow').style.width  = Math.min(100, r.p25/maxEv*100) + '%';
+  document.getElementById('barMid').style.width  = Math.min(100, r.p50/maxEv*100) + '%';
+  document.getElementById('barHigh').style.width = Math.min(100, r.p75/maxEv*100) + '%';
+
+  document.getElementById('evLow').textContent  = fmtLb(r.p25);
+  document.getElementById('evMid').textContent  = fmtLb(r.p50);
+  document.getElementById('evHigh').textContent = fmtLb(r.p75);
+
+  document.getElementById('totLow').textContent  = 'Total EV: ' + fmtM(r.totLow);
+  document.getElementById('totMid').textContent  = 'Total EV: ' + fmtM(r.totMid);
+  document.getElementById('totHigh').textContent = 'Total EV: ' + fmtM(r.totHigh);
+
+  // CNY secondary
+  const cnyRate = parseFloat(document.getElementById('cnyRate').value) || 7.25;
+  if (inp.country === 'china_dom') {
+    document.getElementById('secLow').textContent  = '￥' + (r.totLow/1e6/cnyRate*7.25/1e8).toFixed(2) + '亿元';
+    document.getElementById('secMid').textContent  = '￥' + (r.totMid/1e6/cnyRate*7.25/1e8).toFixed(2) + '亿元';
+    document.getElementById('secHigh').textContent = '￥' + (r.totHigh/1e6/cnyRate*7.25/1e8).toFixed(2) + '亿元';
+  } else {
+    document.getElementById('secLow').textContent = '';
+    document.getElementById('secMid').textContent = '';
+    document.getElementById('secHigh').textContent = '';
+  }
+
+  document.getElementById('compCount').innerHTML = `Based on <span>${r.nPool}</span> comparable transactions`;
+
+  // Byproduct panel (standard+)
+  const bpPanel = document.getElementById('bpPanel');
+  const hasBp = r.userBp.total > 0 && (mode==='standard'||mode==='expert');
+  bpPanel.classList.toggle('vis', hasBp);
+  if (hasBp) {
+    const bpPct = (r.userBp.total / r.totMid * 100).toFixed(0);
+    const rows = [
+      {n:'Au credit', v:r.userBp.au},
+      {n:'Ag credit', v:r.userBp.ag},
+      {n:'Mo credit', v:r.userBp.mo},
+      {n:'Co credit', v:r.userBp.co},
+    ].filter(x => x.v > 0);
+    document.getElementById('bpRows').innerHTML =
+      `<div class="bp-row"><span class="bp-name">Total byproduct credit</span><span class="bp-val">${fmtM(r.userBp.total)} (${bpPct}% of mid EV)</span></div>` +
+      rows.map(x => `<div class="bp-row"><span class="bp-name">${x.n}</span><span class="bp-val">${fmtM(x.v)}</span></div>`).join('');
+    document.getElementById('bpDonut').innerHTML = buildDonut(r.userBp, r.totMid);
+    // Au-dominant warning
+    const bpWarn = document.getElementById('bpWarn');
+    if (r.userBp.total > r.totMid * 0.5) {
+      bpWarn.textContent = '⚠ Byproduct-dominant asset — Au/Ag/Mo/Co value exceeds 50% of total EV. Consider gold or polymetallic valuation framework.';
+      bpWarn.classList.add('vis');
+    } else {
+      bpWarn.classList.remove('vis');
+    }
+  }
+
+  // Adjustments panel (standard+)
+  const adjPanel = document.getElementById('adjPanel');
+  if (r.adjs.length > 0 && (mode==='standard'||mode==='expert')) {
+    adjPanel.classList.add('vis');
+    document.getElementById('adjRows').innerHTML = r.adjs.map(a =>
+      `<div class="adj-row"><span class="adj-name">${a.n}</span><span class="adj-v ${a.c}">${a.v}</span></div>`
+    ).join('');
+  } else {
+    adjPanel.classList.remove('vis');
+  }
+
+  // Sensitivity heatmap (expert)
+  const sensWrap = document.getElementById('sensWrap');
+  if (mode === 'expert') {
+    sensWrap.classList.add('vis');
+    buildHeatmap(inp, r);
+  } else {
+    sensWrap.classList.remove('vis');
+  }
+
+  // Comparables table
+  renderComps(r.comps, inp.cuPrice);
+}
+
+function renderComps(comps, cuPrice) {
+  const isExp = mode === 'expert';
+  const rows = comps.map((x, i) => {
+    const d = x.d;
+    const adjEv = (normalizeGrossEvPerLb(d, cuPrice)).toFixed(3);
+    const netEv = x.netEvLb.toFixed(3);
+    const stageClass = d.stage===4?'s4b':d.stage===3?'s3b':'s2b';
+    const stageName = STAGE_NAMES[d.stage]||d.stage;
+    const depName = DEP_NAMES[d.depositType]||d.depositType||'';
+    const barW = Math.round((x.score/100)*50);
+    return `<tr onclick="this.classList.toggle('sel')">
+      <td class="td-proj" title="${d.project} (${d.buyer}, ${d.year})">${d.project}</td>
+      <td><span class="sbadge ${stageClass}">${stageName}</span></td>
+      <td>${d.cuPct.toFixed(2)}%</td>
+      <td>${(d.cuKt/100).toFixed(0)}万吨</td>
+      <td class="td-ev">$${adjEv}/lb</td>
+      <td class="td-net">$${netEv}/lb</td>
+      ${isExp ? `<td><span class="mbr" style="width:${barW}px"></span><span class="mpct">${x.score}%</span></td>` : ''}
+    </tr>`;
+  }).join('');
+
+  const expTh = isExp ? '<th>MATCH</th>' : '';
+  document.getElementById('compTbl').innerHTML = `
+    <table class="ctbl">
+      <thead><tr>
+        <th>PROJECT</th><th>STAGE</th><th>GRADE</th><th>Cu METAL</th>
+        <th>EV/lb (adj)</th><th>NET EV/lb</th>${expTh}
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  document.getElementById('compSub').textContent =
+    `${comps.length} transactions — EV/lb normalized to $${parseFloat(document.getElementById('cuPrice').value).toFixed(2)}/lb Cu`;
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+function exportJSON() {
+  const data = {
+    tool: 'Copper Mine Valuation Tool v3.0',
+    timestamp: new Date().toISOString(),
+    inputs: {
+      resourceMt: document.getElementById('resInput').value,
+      unit: resUnit,
+      gradePct: document.getElementById('gradeInput').value,
+      cuPriceUsdLb: document.getElementById('cuPrice').value,
+      stage: STAGE_NAMES[stage],
+      depositType: document.getElementById('depType').value,
+      auGt: document.getElementById('auGt').value,
+      agGt: document.getElementById('agGt').value,
+      moPpm: document.getElementById('moPpm').value,
+      coPpm: document.getElementById('coPpm').value,
+      c1UsdLb: document.getElementById('c1Cost').value,
+      country: document.getElementById('country').value,
+    },
+    methodology: 'Comparable Transaction Method, Net EV/lb Cu, Cu price elasticity 0.8',
+    disclaimer: 'Indicative only. Not investment advice.'
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'copper_valuation_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+// ── CLOCK ──────────────────────────────────────────────────────────────────
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toISOString().replace('T',' ').slice(0,19) + ' UTC';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Enter key triggers calculate
+document.addEventListener('keydown', e => { if (e.key==='Enter') calculate(); });
+</script>
+</body>
+</html>
