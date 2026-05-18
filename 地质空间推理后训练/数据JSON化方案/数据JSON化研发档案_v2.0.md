@@ -169,6 +169,24 @@ ore_photo / thin_section / model_diagram / other
 
 * **全程**：Opus 抽检10%，不合格整批重跑
 
+**提取维度（3个并行）**：
+- 维度1：实体+关系（12类实体 + 11类关系）
+- 维度2：七要素证据归属（每条证据标注支撑哪个要素）
+- 维度3：论文贡献摘要（该论文对其研究区域的核心贡献）
+
+**论文贡献摘要**（新增，支撑区域记忆）：
+```json
+{
+  "paper_contribution": {
+    "to_region": "Kadoma-Eiffel Flats",
+    "contribution_type": "structural_control",
+    "one_sentence": "确立了D2期走滑剪切带对金矿化的控制关系",
+    "key_data_points": ["90%金矿点位于D2剪切带50m范围内"],
+    "supports_elements": ["fluid_pathway", "trap"]
+  }
+}
+```
+
 **实体类型（12类）**：
 
 ```
@@ -206,7 +224,24 @@ M5提取时，不仅提取实体/关系，还要标注每条证据支撑Mineral 
 
 **DoD**：entity-F1 ≥ 0.78，relation-F1 ≥ 0.65，七要素归属覆盖率 ≥ 80%
 
-### 2.5 M6 训练样本合成（核心）
+### 2.5 M5.5 区域知识聚合（新增，支撑区域记忆）
+
+**输入**：M5产出的所有论文的`paper_contribution` + `region_hierarchy`
+**输出**：每个区域一个`regional_knowledge_index.json`
+
+**处理逻辑**：
+1. 按`region_hierarchy`聚合同区域论文
+2. 合成`knowledge_summary_by_element`（按七要素归纳区域已知信息）
+3. 识别`knowledge_gaps`（哪些要素缺少直接证据 → 转化为工作建议）
+4. 处理冲突（不同论文结论矛盾时标注最新/最可靠的）
+5. 记录勘探历史（已知矿床、历史产量、勘探现状）
+
+**工具**：Gemini 2.5 Pro（1M上下文，一次喂入同区域所有论文的contribution摘要）
+**DoD**：每个区域索引覆盖七要素中≥5个要素的已知信息
+
+**规模**：6矿系 × 20-30个重点区域 = 120-180个区域索引
+
+### 2.6 M6 训练样本合成（核心）
 
 **产出4类训练样本**：
 
@@ -255,7 +290,11 @@ M5提取时，不仅提取实体/关系，还要标注每条证据支撑Mineral 
     "language": "en",
     "mineral_system_tags": ["PORP-CUMO"],
     "deposit_examples": ["El Teniente"],
-    "region": "Central Chilean Andes"
+    "region_hierarchy": {
+      "level_1": "Andes Orogen",
+      "level_2": "Central Chilean Porphyry Belt",
+      "level_3": "El Teniente District"
+    }
   },
   "content": {
     "abstract": "...",
@@ -542,20 +581,23 @@ M5提取时，不仅提取实体/关系，还要标注每条证据支撑Mineral 
 
 * Day 10-14：M5 KG抽取（分层：Opus精标 + Gemini批量）
 
-### Phase A.3（7天）— 核心创新
+### Phase A.3（10天）— 核心创新
 
 * Day 15-17：博士论文推理链条提取
 
 * Day 18-19：Spatial Embedding构建（概念向量+空间图谱）
 
-* Day 20-21：M6训练样本合成（S1-S4）+ 质量验收
+* Day 20-22：区域知识聚合（M5.5，按区域合成文献索引）
+
+* Day 23-25：M6训练样本合成（基于区域索引生成S1-S4）+ 质量验收
 
 ### 交付物清单
 
 | 交付物               | 格式                     | 说明                                    |
 | ----------------- | ---------------------- | ------------------------------------- |
 | 结构化文档集            | JSON（MSM-DocSchema v2） | 全量文档的Layer 1产出                        |
-| 知识图谱              | JSONL（kg_dump.jsonl）   | 实体+关系，后训练工程师可导入Neo4j                  |
+| 知识图谱              | JSONL（kg_dump.jsonl）   | 实体+关系+七要素归属，后训练工程师可导入Neo4j           |
+| **区域文献知识索引**      | **JSON（每区域一个文件）**     | **120-180个区域的文献聚合+知识空白识别**            |
 | 博士论文推理案例          | JSON                   | reasoning_cases + scale_linking_cases |
 | Spatial Embedding | JSON + FAISS索引         | 概念向量 + 空间图谱 + 相似度索引                   |
 | S1预训练语料           | JSONL                  | 1-2B token                            |
@@ -709,13 +751,95 @@ M5提取时，不仅提取实体/关系，还要标注每条证据支撑Mineral 
 **提取来源**：对比研究论文 + 综述论文
 **每个矿系需要**：10-20对高质量对比
 
-### 10.6 对M5/M6工作量的影响
+### 10.6 新需求6：区域文献知识索引 ⭐⭐⭐⭐⭐（极关键）
+
+**支撑模板模块**：全部模块（§1-§9每个模块都需要文献支撑）
+
+**问题诊断**：
+当前数据结构中，每篇论文独立存储。但当模型评估一个具体区域时，没有高效方式"调出该区域所有相关文献的关键结论"。导致输出引用贫瘠，像教科书泛泛而谈，而不是"站在前人肩膀上"的专业评估。
+
+**核心洞察**：
+- 一个区域（如Kadoma）可能有200-500篇直接相关论文
+- 模型需要知道"前人在这里做了什么、发现了什么、还有什么空白"
+- 有文献支撑的推理（85-90分）vs 泛泛教科书式推理（70-75分）
+- 知识空白本身就是找矿建议的一部分（"缺少X数据 → 建议做X"）
+
+**数据结构**：
+
+```json
+{
+  "regional_knowledge_index": {
+    "region_id": "kadoma_midlands_zimbabwe",
+    "region_name": "Kadoma, Midlands Greenstone Belt, Zimbabwe",
+    "hierarchy": {
+      "craton": "Zimbabwe Craton",
+      "belt": "Midlands Greenstone Belt",
+      "district": "Kadoma-Eiffel Flats"
+    },
+    "total_papers": 47,
+    "key_papers": [
+      {
+        "doc_id": "paper_blenkinsop1995",
+        "authors": "Blenkinsop et al.",
+        "year": 1995,
+        "contribution": "确立了D2期走滑剪切带对金矿化的控制关系",
+        "key_data_points": [
+          "90%金矿点位于D2剪切带50m范围内",
+          "D2为左行走滑，形成anastomosing剪切网络"
+        ],
+        "supports_elements": ["fluid_pathway", "trap"]
+      }
+    ],
+    "knowledge_summary_by_element": {
+      "energy_source": "D2期区域走滑变形提供持续构造驱动（Jelsma 1996）",
+      "fluid_source": "变质脱水流体为主，δ18O=+5-8‰（Oberthür 2000）",
+      "fluid_pathway": "Kadoma-Eiffel Flats剪切带，>30km（Blenkinsop 1995）",
+      "metal_source": "基性火山岩Au背景值偏高（推断，缺少直接Pb同位素数据）",
+      "precipitation": "构造减压+化学还原（推断，缺少直接证据）",
+      "trap": "剪切带弯曲段+BIF层交汇处（Blenkinsop 1995）",
+      "preservation": "克拉通稳定，绿片岩相保留（区域共识）"
+    },
+    "knowledge_gaps": [
+      {
+        "gap": "缺少本区直接的Pb同位素数据",
+        "implication": "金属源判断基于推断",
+        "suggested_work": "采集含金硫化物做Pb同位素分析"
+      },
+      {
+        "gap": "深部（>300m）矿化信息空白",
+        "implication": "无法判断深部延伸潜力",
+        "suggested_work": "深钻验证"
+      }
+    ],
+    "exploration_history": {
+      "major_mines": ["Cam & Motor (>100t Au)", "Dalny", "Golden Valley"],
+      "total_historical_production_moz": 3.5,
+      "last_major_exploration": "1990s",
+      "current_status": "多数矿山停产，深部和走向延伸未充分勘探"
+    }
+  }
+}
+```
+
+**构建方式**：
+1. M5 KG抽取时，同时标注每篇论文的`region`归属
+2. 按region聚合所有相关论文，提取每篇的`contribution`和`key_data_points`
+3. 用Opus合成`knowledge_summary_by_element`（按七要素归纳区域已知信息）
+4. 识别`knowledge_gaps`（哪些要素缺少直接证据 → 转化为工作建议）
+
+**工作量估计**：
+- 6矿系 × 每矿系20-30个重点区域 = 120-180个区域索引
+- 每个区域整理10-50篇核心论文的贡献摘要
+- 用Gemini 2.5 Pro批量生成，Opus抽检
+
+### 10.7 对M5/M6工作量的影响（更新）
 
 | 新增任务 | 影响模块 | 工作量增加 | 优先级 |
 |---------|---------|-----------|--------|
 | 判别规则库 | M6新增 | 新任务 | 必须有 |
 | 七要素归属 | M5增强 | +30% | 必须有 |
 | 空间分带模型 | M6新增 | 新任务（最重） | 必须有 |
+| **区域文献知识索引** | **M5+M6新增** | **新任务（极关键）** | **必须有** |
 | 勘探方法论 | M6新增 | 新任务 | 锦上添花 |
 | 矿床对比差异 | M6新增 | 新任务 | 锦上添花 |
 
