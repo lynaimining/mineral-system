@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地质空间推理后训练 — 数据JSON化方案</title>
+<style>
+:root {
+    --primary: #1a365d;
+    --secondary: #2c5282;
+    --accent: #ed8936;
+    --success: #38a169;
+    --warning: #d69e2e;
+    --bg: #f7fafc;
+    --card-bg: #ffffff;
+    --text: #2d3748;
+    --text-light: #718096;
+    --border: #e2e8f0;
+    --code-bg: #2d3748;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+}
+
+.container { max-width: 1400px; margin: 0 auto; padding: 40px 24px; }
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 60px 40px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 500px;
+    height: 500px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+}
+.header h1 { font-size: 2.2em; margin-bottom: 12px; font-weight: 700; position: relative; }
+.header .subtitle { font-size: 1.1em; opacity: 0.9; margin-bottom: 24px; position: relative; }
+.header .meta { display: flex; gap: 24px; font-size: 0.9em; opacity: 0.8; flex-wrap: wrap; position: relative; }
+.header .meta span { background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; }
+
+/* Section */
+.section { margin-bottom: 48px; }
+.section-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--accent);
+    display: inline-block;
+}
+
+/* Cards */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.card-title { font-size: 1.1em; font-weight: 600; color: var(--primary); margin-bottom: 12px; }
+.card-desc { font-size: 0.9em; color: var(--text); line-height: 1.6; }
+.card-value { font-size: 2em; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+
+/* Table */
+.table-wrapper {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+th {
+    background: var(--primary);
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+}
+td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+tr:hover td { background: #f7fafc; }
+tr:last-child td { border-bottom: none; }
+
+/* Code Block */
+.code-block {
+    background: var(--code-bg);
+    color: #e2e8f0;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85em;
+    line-height: 1.5;
+    margin: 16px 0;
+}
+
+/* Decision Box */
+.decision-box {
+    background: linear-gradient(135deg, #fffaf0 0%, #fefcbf 100%);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+}
+.decision-box h3 { color: #975a16; margin-bottom: 12px; }
+
+/* Highlight Box */
+.highlight-box {
+    background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+    border-left: 4px solid var(--success);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+/* Badge */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+    margin-right: 8px;
+}
+.badge-success { background: #c6f6d5; color: #276749; }
+.badge-warning { background: #fefcbf; color: #975a16; }
+.badge-info { background: #bee3f8; color: #2c5282; }
+
+/* Directory Tree */
+.tree {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85em;
+    line-height: 1.8;
+}
+.tree-item { padding-left: 20px; }
+.tree-folder { color: var(--accent); font-weight: 600; }
+.tree-file { color: var(--text-light); }
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-light);
+    font-size: 0.85em;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+}
+
+@media (max-width: 768px) {
+    .header { padding: 40px 24px; }
+    .header h1 { font-size: 1.6em; }
+    .card-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="header">
+    <h1>地质空间推理后训练 — 数据JSON化方案</h1>
+    <div class="subtitle">全链路JSON化 · 可逆设计 · 分层存储 · 博士论文推理链条提取</div>
+    <div class="meta">
+        <span>LynAI Mining</span>
+        <span>2026年5月18日</span>
+        <span>版本 v1.0</span>
+        <span>负责人：邹心宇</span>
+    </div>
+</div>
+
+<!-- 核心原则 -->
+<div class="section">
+    <div class="section-title">核心原则</div>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-title">🔄 全链路JSON化</div>
+            <div class="card-desc">从文档提取到训练数据生成，每个环节都使用统一的JSON Schema，确保数据可追溯、可复现、可迭代。</div>
+        </div>
+        <div class="card">
+            <div class="card-title">↩️ 可逆性保证</div>
+            <div class="card-desc">原始PDF文件始终保留，每一层都是派生物，任何环节不满意都可以重跑。Schema后期调整只需批量迁移脚本。</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📦 分层存储</div>
+            <div class="card-desc">提取层、知识层、训练层独立存储，用doc_id关联，支持并行处理和增量更新。</div>
+        </div>
+    </div>
+</div>
+
+<!-- 数据源清单 -->
+<div class="section">
+    <div class="section-title">数据源清单</div>
+    <div class="table-wrapper">
+        <table>
+            <tr><th>数据源</th><th>数量</th><th>核心价值</th><th>主要用途</th></tr>
+            <tr>
+                <td><strong>学术期刊论文</strong></td>
+                <td>100,000篇</td>
+                <td>成矿机理、空间推理逻辑</td>
+                <td>SFT核心 + CPT</td>
+            </tr>
+            <tr style="background:#f0fff4;">
+                <td><strong>博士论文</strong></td>
+                <td>~500篇</td>
+                <td><strong>完整推理链条</strong>、多尺度关联</td>
+                <td>SFT推理链条 + DPO chosen + CoT训练</td>
+            </tr>
+            <tr>
+                <td><strong>JORC报告</strong></td>
+                <td>1,139家</td>
+                <td>标准化定量数据、矿体几何</td>
+                <td>CPT + RAG + 定量QA</td>
+            </tr>
+            <tr>
+                <td><strong>NI 43-101报告</strong></td>
+                <td>~9,721份</td>
+                <td>北美项目数据、可研分析</td>
+                <td>CPT + RAG (Phase 2)</td>
+            </tr>
+            <tr>
+                <td><strong>专业书籍</strong></td>
+                <td>443本</td>
+                <td>系统性知识框架、术语体系</td>
+                <td>CPT知识底座</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- 目录结构 -->
+<div class="section">
+    <div class="section-title">目录结构</div>
+    <div class="tree">
+data/<br>
+├── layer1_extraction/           <span class="tree-folder"># 提取层（Marker/Camelot产出）</span><br>
+│   ├── papers/                  <span class="tree-file"># 期刊论文 paper_{doi_hash}.json</span><br>
+│   ├── theses/                  <span class="tree-file"># 博士论文 thesis_{id}.json</span><br>
+│   ├── jorc/                    <span class="tree-file"># JORC报告 jorc_{company}_{year}.json</span><br>
+│   ├── ni43101/                 <span class="tree-file"># NI 43-101</span><br>
+│   └── books/                   <span class="tree-file"># 书籍 book_{isbn}.json</span><br>
+├── layer2_knowledge/            <span class="tree-folder"># 知识结构化层（LLM提取）</span><br>
+│   ├── spatial_anchors/         <span class="tree-file"># 空间锚点 anchor_{doc_id}.json</span><br>
+│   ├── figures/                 <span class="tree-file"># 图件元数据 fig_{doc_id}.json</span><br>
+│   └── tables/                  <span class="tree-file"># 表格结构化 table_{doc_id}.json</span><br>
+├── layer3_training/             <span class="tree-folder"># 训练数据层</span><br>
+│   ├── cpt/                     <span class="tree-file"># CPT语料 (JSONL)</span><br>
+│   ├── sft/                     <span class="tree-file"># SFT QA对 (JSONL)</span><br>
+│   └── dpo/                     <span class="tree-file"># DPO偏好对 (JSONL)</span><br>
+├── manifest.json                <span class="tree-file"># 全局索引（处理状态追踪）</span><br>
+└── schema/                      <span class="tree-file"># JSON Schema定义文件</span>
+    </div>
+</div>
+
+<!-- 博士论文核心创新 -->
+<div class="section">
+    <div class="section-title">博士论文 — 核心创新</div>
+    <div class="decision-box">
+        <h3>💡 关键洞察：博士论文 ≠ 更长的期刊论文</h3>
+        <p style="margin-top:8px;">
+            <strong>博士论文的独特价值</strong>：完整的推理链条（"观察 → 背景整合 → 假设检验 → 推断 → 验证"），多尺度因果关联，推理过程透明。<br><br>
+            <strong>期刊论文的局限</strong>：篇幅限制，只展示最终结论和关键证据，推理过程被压缩，很多细节被删掉。<br><br>
+            <strong>对训练的意义</strong>：期刊论文教模型"快速判断"，博士论文教模型"推理链条"。
+        </p>
+    </div>
+
+    <div class="card-grid">
+        <div class="card" style="border-left: 4px solid var(--success);">
+            <div class="card-title">推理案例提取</div>
+            <div class="card-desc">
+                提取跨章节的完整推理案例，包含观察、背景整合、假设检验、推断、验证五个步骤，直接生成CoT格式QA对。
+            </div>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--accent);">
+            <div class="card-title">多尺度关联</div>
+            <div class="card-desc">
+                提取"同一现象在不同尺度的表现"，训练模型的尺度转换能力（显微→露头→矿床→区域）。
+            </div>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--secondary);">
+            <div class="card-title">知识图谱骨架</div>
+            <div class="card-desc">
+                从文献综述章节构建"矿床类型→典型矿床→关键特征"的知识图谱框架。
+            </div>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--warning);">
+            <div class="card-title">对比辨析案例</div>
+            <div class="card-desc">
+                从讨论章节提取"为什么是A而不是B"的辨析内容，生成评估基准题。
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 博士论文多种用法 -->
+<div class="section">
+    <div class="section-title">博士论文的多种用法</div>
+    <div class="table-wrapper">
+        <table>
+            <tr><th>用法</th><th>数据来源</th><th>训练阶段</th><th>价值</th></tr>
+            <tr>
+                <td><strong>推理链条训练</strong></td>
+                <td>reasoning_cases</td>
+                <td>SFT</td>
+                <td>教模型完整推理过程（CoT格式）</td>
+            </tr>
+            <tr>
+                <td><strong>多尺度关联</strong></td>
+                <td>scale_linking_cases</td>
+                <td>SFT</td>
+                <td>训练尺度转换能力</td>
+            </tr>
+            <tr>
+                <td><strong>知识图谱骨架</strong></td>
+                <td>knowledge_structure</td>
+                <td>GraphRAG</td>
+                <td>构建矿床类型知识框架</td>
+            </tr>
+            <tr>
+                <td><strong>DPO偏好对齐</strong></td>
+                <td>reasoning_cases</td>
+                <td>DPO</td>
+                <td>作为chosen样本（详细推理）</td>
+            </tr>
+            <tr>
+                <td><strong>评估基准</strong></td>
+                <td>contrastive_cases</td>
+                <td>Evaluation</td>
+                <td>生成对比推理题</td>
+            </tr>
+            <tr>
+                <td><strong>系统性知识</strong></td>
+                <td>chapters</td>
+                <td>CPT</td>
+                <td>全文喂入建立知识底座</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- 关键决策记录 -->
+<div class="section">
+    <div class="section-title">关键决策记录</div>
+    <div class="table-wrapper">
+        <table>
+            <tr><th>决策点</th><th>选择</th><th>理由</th></tr>
+            <tr>
+                <td><strong>存储粒度</strong></td>
+                <td>每文档每层一个JSON</td>
+                <td>并行友好，单篇失败不影响全局</td>
+            </tr>
+            <tr>
+                <td><strong>矿床类型标注</strong></td>
+                <td>Layer 1就标注</td>
+                <td>方便按类型筛选，MVP阶段关键</td>
+            </tr>
+            <tr>
+                <td><strong>引用关系</strong></td>
+                <td>简单存字符串数组</td>
+                <td>重点是论文内部空间关系</td>
+            </tr>
+            <tr>
+                <td><strong>细粒度标注</strong></td>
+                <td>Layer 2做</td>
+                <td>Layer 1保持Marker原始输出</td>
+            </tr>
+            <tr>
+                <td><strong>钻孔数据</strong></td>
+                <td>CSV/Parquet单独存</td>
+                <td>JSON会臃肿，表格数据用表格格式</td>
+            </tr>
+            <tr>
+                <td><strong>资源量分类</strong></td>
+                <td>保留原文</td>
+                <td>不同标准不完全等价，强行映射丢失信息</td>
+            </tr>
+            <tr style="background:#f0fff4;">
+                <td><strong>博士论文处理</strong></td>
+                <td>独立Schema，提取推理案例</td>
+                <td>核心价值是推理链条，不是信息量</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- 分阶段使用策略 -->
+<div class="section">
+    <div class="section-title">分阶段使用策略</div>
+    <div class="table-wrapper">
+        <table>
+            <tr><th>训练阶段</th><th>博士论文用法</th><th>期刊论文用法</th></tr>
+            <tr>
+                <td><strong>CPT</strong></td>
+                <td>全文喂入（包括文献综述），建立系统性知识框架</td>
+                <td>全文喂入，覆盖广度</td>
+            </tr>
+            <tr>
+                <td><strong>SFT</strong></td>
+                <td>只用reasoning_cases和scale_linking_cases，训练推理能力</td>
+                <td>生成"快速判断"类QA</td>
+            </tr>
+            <tr>
+                <td><strong>DPO</strong></td>
+                <td>reasoning_cases作为chosen（详细推理）</td>
+                <td>简化版本作为rejected</td>
+            </tr>
+            <tr>
+                <td><strong>GraphRAG</strong></td>
+                <td>knowledge_structure作为图谱骨架</td>
+                <td>作为图谱节点</td>
+            </tr>
+            <tr>
+                <td><strong>Evaluation</strong></td>
+                <td>contrastive_cases生成评估题</td>
+                <td>补充评估题</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- 数据配比建议 -->
+<div class="section">
+    <div class="section-title">数据配比建议</div>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-title">CPT阶段 (1-2B tokens)</div>
+            <div class="card-desc">
+                • 期刊论文: 60%<br>
+                • JORC/NI 43-101: 30%<br>
+                • 书籍: 10%<br>
+                • 博士论文: 全文喂入（不单独计入配比）
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">SFT阶段 (8-15K QA对)</div>
+            <div class="card-desc">
+                • 期刊论文: 50%（快速判断类）<br>
+                • 博士论文: 30%（推理链条类）<br>
+                • JORC: 15%（定量预测类）<br>
+                • 书籍: 5%（教学式QA）
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">DPO阶段 (5-10K偏好对)</div>
+            <div class="card-desc">
+                • 博士论文推理段落 vs 期刊论文简化版本: 70%<br>
+                • Opus vs Sonnet生成对: 30%
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Schema示例 -->
+<div class="section">
+    <div class="section-title">Schema示例 — 博士论文推理案例</div>
+    <div class="code-block">
+{
+  "reasoning_cases": [
+    {
+      "case_id": "rc_01",
+      "title": "从蚀变分带推断成矿类型",
+      "reasoning_type": "inductive",
+      "scale_from": "outcrop",
+      "scale_to": "deposit",
+      "steps": [
+        {
+          "step": 1,
+          "type": "observation",
+          "content": "野外观察到钾化带→绢英岩化带→青磐岩化带的同心环状分带",
+          "evidence": "第3章3.2节，图3-5"
+        },
+        {
+          "step": 2,
+          "type": "background_integration",
+          "content": "结合区域上斑岩铜矿的典型特征",
+          "evidence": "第2章文献综述"
+        },
+        {
+          "step": 3,
+          "type": "hypothesis_testing",
+          "content": "排除了浅成低温热液的可能",
+          "evidence": "第4章4.3节讨论"
+        },
+        {
+          "step": 4,
+          "type": "inference",
+          "content": "推断为斑岩系统",
+          "evidence": "第5章综合讨论"
+        },
+        {
+          "step": 5,
+          "type": "verification",
+          "content": "锆石U-Pb年龄验证",
+          "evidence": "第4章4.5节"
+        }
+      ],
+      "cot_format": "让我们一步步分析：\n1. 首先观察到...\n2. 结合区域背景...\n3. 排除了...的可能\n4. 因此推断为...\n5. 这个推断可以用...验证",
+      "usage": ["sft_cot", "dpo_chosen"]
+    }
+  ]
+}
+    </div>
+</div>
+
+<!-- 实施路线图 -->
+<div class="section">
+    <div class="section-title">实施路线图</div>
+    <div class="highlight-box">
+        <h3 style="color: var(--success); margin-bottom: 12px;">Phase 1: MVP验证（Week 1-2）</h3>
+        <p>
+            1. 精选50篇论文（斑岩Cu 25篇 + 造山Au 25篇）<br>
+            2. 提取为Layer 1 JSON<br>
+            3. 生成200条QA对<br>
+            4. LoRA微调验证效果<br>
+            5. <strong>Go/No-Go决策</strong>
+        </p>
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-title">Phase 2: 全量处理（Week 3-7）</div>
+            <div class="card-desc">
+                Marker多机并行解析100K论文 → CLIP图件筛选 + 按需VLM富化 → 空间锚点提取（Layer 2） → Opus+o3精标 + Gemini批量QA生成
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">Phase 3: 训练与评估（Week 8-12）</div>
+            <div class="card-desc">
+                CPT (1-2B tokens) → LoRA SFT (8-15K QA对) → DPO对齐 (5-10K偏好对) → LazyGraphRAG搭建 → MSM-Bench评估
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p><strong>LynAI Mining · 地质空间推理后训练 — 数据JSON化方案</strong></p>
+    <p style="margin-top:8px;">版本 v1.0 · 2026年5月18日 · 负责人：邹心宇 · 审核：王选策</p>
+    <p style="margin-top:12px; font-size:0.9em;">
+        完整研发档案请参阅：<code>数据JSON化研发档案.md</code>
+    </p>
+</div>
+
+</div>
+</body>
+</html>
