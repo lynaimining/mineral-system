@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mineral System Model — 数据JSON化方案 v2.0</title>
+<style>
+:root {
+    --primary: #1a365d;
+    --secondary: #2c5282;
+    --accent: #ed8936;
+    --success: #38a169;
+    --warning: #d69e2e;
+    --danger: #e53e3e;
+    --bg: #f7fafc;
+    --card-bg: #ffffff;
+    --text: #2d3748;
+    --text-light: #718096;
+    --border: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+}
+.header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, #2b6cb0 100%);
+    color: white;
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+    animation: pulse 8s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+.header h1 {
+    font-size: 2.4em;
+    font-weight: 700;
+    margin-bottom: 12px;
+    position: relative;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.header .subtitle {
+    font-size: 1.1em;
+    opacity: 0.9;
+    margin-bottom: 20px;
+    position: relative;
+}
+.header .meta {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    position: relative;
+    font-size: 0.9em;
+    opacity: 0.85;
+}
+.header .meta span {
+    background: rgba(255,255,255,0.15);
+    padding: 4px 14px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+}
+.section {
+    margin-bottom: 48px;
+}
+.section-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.section-title .num {
+    background: var(--accent);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.decision-box {
+    background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
+    border-left: 5px solid var(--secondary);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 16px 0;
+    font-size: 1.05em;
+}
+.decision-box.highlight {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-left-color: var(--accent);
+}
+.decision-box strong {
+    color: var(--primary);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.92em;
+}
+th {
+    background: var(--primary);
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+}
+td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+}
+tr:nth-child(even) { background: #f8fafc; }
+tr:hover { background: #edf2f7; }
+.pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.pipeline-step {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    position: relative;
+}
+.pipeline-step::before {
+    content: '';
+    position: absolute;
+    left: 50px;
+    bottom: -16px;
+    width: 2px;
+    height: 16px;
+    background: var(--accent);
+}
+.pipeline-step:last-child::before { display: none; }
+.step-badge {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    min-width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+.step-content { flex: 1; }
+.step-content h4 { color: var(--primary); margin-bottom: 4px; font-size: 1.05em; }
+.step-content p { color: var(--text-light); font-size: 0.9em; }
+.dod-tag {
+    display: inline-block;
+    background: #f0fff4;
+    color: var(--success);
+    border: 1px solid #c6f6d5;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.82em;
+    font-weight: 600;
+    margin-top: 6px;
+}
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin: 16px 0;
+}
+.card-grid .card {
+    padding: 22px;
+    text-align: center;
+}
+.card-grid .card h4 {
+    color: var(--primary);
+    margin-bottom: 8px;
+    font-size: 1.05em;
+}
+.card-grid .card p {
+    color: var(--text-light);
+    font-size: 0.9em;
+}
+.card-icon {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+.code-block {
+    background: #1a202c;
+    color: #e2e8f0;
+    border-radius: 10px;
+    padding: 24px;
+    overflow-x: auto;
+    font-family: "Fira Code", "Consolas", monospace;
+    font-size: 0.85em;
+    line-height: 1.6;
+    margin: 16px 0;
+}
+.code-block .key { color: #90cdf4; }
+.code-block .str { color: #68d391; }
+.code-block .comment { color: #718096; font-style: italic; }
+.code-block .type { color: #fbd38d; }
+.timeline {
+    position: relative;
+    padding-left: 40px;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--accent), var(--success));
+    border-radius: 2px;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 24px;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px var(--accent);
+}
+.timeline-item.milestone::before {
+    background: var(--success);
+    box-shadow: 0 0 0 3px var(--success);
+    width: 18px;
+    height: 18px;
+    left: -34px;
+    top: 22px;
+}
+.timeline-item h4 { color: var(--primary); margin-bottom: 6px; }
+.timeline-item .duration {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 16px 0;
+}
+.summary-item {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border-top: 4px solid var(--accent);
+}
+.summary-item .number {
+    font-size: 2em;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 6px;
+}
+.summary-item .label {
+    color: var(--text-light);
+    font-size: 0.9em;
+}
+.tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+    margin: 2px 4px 2px 0;
+}
+.tag-blue { background: #ebf8ff; color: #2b6cb0; }
+.tag-green { background: #f0fff4; color: #276749; }
+.tag-orange { background: #fffbeb; color: #92400e; }
+.tag-red { background: #fff5f5; color: #c53030; }
+.footer {
+    background: var(--primary);
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+    padding: 30px;
+    font-size: 0.9em;
+}
+.arrow-down {
+    text-align: center;
+    color: var(--accent);
+    font-size: 1.5em;
+    margin: 8px 0;
+}
+@media (max-width: 768px) {
+    .header { padding: 40px 20px; }
+    .header h1 { font-size: 1.6em; }
+    .header .meta { gap: 12px; }
+    .container { padding: 24px 16px; }
+    .pipeline-step { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    table { font-size: 0.82em; }
+    th, td { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <h1>Mineral System Model — 数据JSON化方案 v2.0</h1>
+    <p class="subtitle">全链路JSON化 · Spatial Embedding · 博士论文推理链条 · 工程化交付</p>
+    <div class="meta">
+        <span>LynAI Mining</span>
+        <span>2026年5月</span>
+        <span>版本 v2.0</span>
+        <span>负责人：邹心宇</span>
+    </div>
+</div>
+
+<div class="container">
+
+<!-- SECTION 1 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">1</span>项目定位</h2>
+    <div class="decision-box">
+        <strong>定位声明：</strong>本方案是 MSM（Mineral System Model）基座大模型的<strong>数据准备阶段</strong>，为后训练提供高质量、结构化的地质领域训练数据。
+    </div>
+    <div class="card" style="margin-top:20px;">
+        <h4 style="color:var(--primary);margin-bottom:12px;">最终产品形态</h4>
+        <p style="font-size:1.05em;margin-bottom:16px;">给定目标区域 → 输出<strong>地质背景分析</strong> + <strong>矿种预测</strong> + <strong>Mineral System Model 完整报告</strong></p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;">
+            <span class="tag tag-blue">区域地质输入</span>
+            <span style="color:var(--accent);font-weight:700;">→</span>
+            <span class="tag tag-green">MSM 基座模型推理</span>
+            <span style="color:var(--accent);font-weight:700;">→</span>
+            <span class="tag tag-orange">结构化报告输出</span>
+        </div>
+    </div>
+    <div class="decision-box highlight" style="margin-top:16px;">
+        <strong>邹心宇职责：</strong>Phase A 数据准备全流程，交付结构化训练数据给后训练工程师。包括：数据采集、版面解析、知识抽取、样本合成、Spatial Embedding 构建。
+    </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">2</span>数据源清单</h2>
+    <div class="card">
+        <table>
+            <thead>
+                <tr><th>数据源</th><th>规模</th><th>核心价值</th><th>主要用途</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>期刊论文</strong></td><td>~100,000 篇</td><td>前沿研究成果、实验数据、地球化学分析</td><td>S1预训练语料 + S2多模态VQA</td></tr>
+                <tr><td><strong>博士论文</strong></td><td>~500 篇</td><td>完整推理链条、多尺度分析、系统性论证</td><td>S3空间推理trace + 推理教程</td></tr>
+                <tr><td><strong>JORC报告</strong></td><td>1,139 份</td><td>标准化资源量估算、技术经济评价</td><td>S1预训练 + 领域知识注入</td></tr>
+                <tr><td><strong>NI 43-101报告</strong></td><td>~9,721 份</td><td>勘探数据、地质模型、可行性研究</td><td>S1预训练 + S4偏好对构建</td></tr>
+                <tr><td><strong>专业书籍</strong></td><td>443 本</td><td>系统性知识体系、经典理论框架</td><td>知识图谱构建 + 概念空间向量</td></tr>
+            </tbody>
+        </table>
+        <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;">
+            <span class="tag tag-blue">总计 110,000+ 文档</span>
+            <span class="tag tag-green">覆盖6大矿系</span>
+            <span class="tag tag-orange">多语言（中/英为主）</span>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">3</span>数据处理管线 M1–M6</h2>
+    <div class="pipeline">
+        <div class="pipeline-step">
+            <div class="step-badge">M1</div>
+            <div class="step-content">
+                <h4>版面解析</h4>
+                <p>DocLayout-YOLO 检测页面元素 + GOT-OCR 2.0 端到端识别。输出：段落/表格/图片/公式的 bbox 坐标与类型标签。</p>
+                <span class="dod-tag">DoD: layout F1 ≥ 0.92</span>
+            </div>
+        </div>
+        <div class="pipeline-step">
+            <div class="step-badge">M2</div>
+            <div class="step-content">
+                <h4>文本OCR + 公式识别</h4>
+                <p>多语言OCR引擎处理正文文本，LaTeX公式识别引擎处理数学表达式。输出：结构化文本流 + 公式LaTeX。</p>
+                <span class="dod-tag">DoD: CER ≤ 1.5%</span>
+            </div>
+        </div>
+        <div class="pipeline-step">
+            <div class="step-badge">M3</div>
+            <div class="step-content">
+                <h4>表格抽取 + 单位归一</h4>
+                <p>表格结构识别 → 单元格内容提取 → 单位标准化（g/t, %, ppm统一映射）。输出：结构化表格JSON + 归一化数值。</p>
+                <span class="dod-tag">DoD: cell-F1 ≥ 0.88</span>
+            </div>
+        </div>
+        <div class="pipeline-step">
+            <div class="step-badge">M4</div>
+            <div class="step-content">
+                <h4>图件分类 + Caption解析</h4>
+                <p>地质图件分类（地质图/剖面图/地球化学图/显微照片等）→ 图注提取与结构化。输出：图件类型标签 + 结构化caption。</p>
+                <span class="dod-tag">DoD: macro-F1 ≥ 0.80</span>
+            </div>
+        </div>
+        <div class="pipeline-step">
+            <div class="step-badge">M5</div>
+            <div class="step-content">
+                <h4>知识图谱：实体 + 关系抽取</h4>
+                <p>地质实体识别（矿床/岩体/构造/矿物/地层）→ 关系抽取（控矿/赋存/切割/侵入）→ 知识图谱构建。</p>
+                <span class="dod-tag">DoD: entity-F1 ≥ 0.78</span>
+            </div>
+        </div>
+        <div class="pipeline-step">
+            <div class="step-badge">M6</div>
+            <div class="step-content">
+                <h4>训练样本合成（S1–S4）</h4>
+                <p>基于M1-M5产出，合成4类训练样本：长文本预训练(S1)、多模态VQA(S2)、空间推理trace(S3)、RL偏好对(S4)。</p>
+                <span class="dod-tag">DoD: 见Section 7产出规格</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">4</span>统一数据契约 MSM-DocSchema v1</h2>
+    <div class="card">
+        <p style="margin-bottom:16px;color:var(--text-light);">所有处理模块的输出统一遵循此Schema，确保数据互操作性和下游训练管线的无缝对接。</p>
+        <div class="code-block">
+<span class="comment">// MSM-DocSchema v1 — 核心结构</span>
+{
+  <span class="key">"doc_id"</span>: <span class="str">"msm-jorc-00142"</span>,
+  <span class="key">"source_type"</span>: <span class="str">"JORC"</span>,  <span class="comment">// journal | thesis | JORC | NI43-101 | book</span>
+  <span class="key">"mineral_system"</span>: <span class="str">"OROG-AU"</span>,  <span class="comment">// 6矿系标签</span>
+  <span class="key">"pages"</span>: [
+    {
+      <span class="key">"page_num"</span>: <span class="type">1</span>,
+      <span class="key">"elements"</span>: [
+        {
+          <span class="key">"type"</span>: <span class="str">"paragraph"</span>,  <span class="comment">// paragraph | table | figure | formula</span>
+          <span class="key">"bbox"</span>: [<span class="type">72, 90, 540, 130</span>],  <span class="comment">// [x0, y0, x1, y1] in pt</span>
+          <span class="key">"content"</span>: <span class="str">"The orogenic gold deposit..."</span>,
+          <span class="key">"entities"</span>: [{<span class="key">"text"</span>: <span class="str">"orogenic gold"</span>, <span class="key">"label"</span>: <span class="str">"DEPOSIT_TYPE"</span>}],
+          <span class="key">"spatial_refs"</span>: [{<span class="key">"coord"</span>: [<span class="type">120.5, -31.2</span>], <span class="key">"crs"</span>: <span class="str">"WGS84"</span>}]
+        }
+      ]
+    }
+  ],
+  <span class="key">"knowledge_graph"</span>: { <span class="comment">// M5输出</span>
+    <span class="key">"entities"</span>: [...],
+    <span class="key">"relations"</span>: [...]
+  },
+  <span class="key">"spatial_embedding"</span>: { <span class="comment">// Spatial Embedding层</span>
+    <span class="key">"concept_vectors"</span>: [...],
+    <span class="key">"scale_index"</span>: <span class="str">"district"</span>
+  }
+}
+        </div>
+        <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+            <span class="tag tag-blue">按页面组织</span>
+            <span class="tag tag-green">含bbox坐标</span>
+            <span class="tag tag-orange">6矿系标签标准化</span>
+            <span class="tag tag-red">空间引用嵌入</span>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">5</span>博士论文核心创新</h2>
+    <div class="decision-box highlight">
+        <strong>关键洞察：</strong>博士论文 ≠ 更长的期刊论文。博士论文是<strong>"完整的推理教程"</strong>——包含从问题提出、多尺度观察、证据链构建到结论推导的全过程，是训练模型空间推理能力的最佳素材。
+    </div>
+    <div class="card" style="margin-top:20px;">
+        <h4 style="color:var(--primary);margin-bottom:16px;">4类结构化数据提取</h4>
+        <table>
+            <thead>
+                <tr><th>数据类型</th><th>说明</th><th>训练用途</th><th>预期产出</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>reasoning_cases</strong></td>
+                    <td>完整推理链条：观察→假设→验证→结论</td>
+                    <td>S3 空间推理trace训练</td>
+                    <td>~2,500条/500篇</td>
+                </tr>
+                <tr>
+                    <td><strong>scale_linking_cases</strong></td>
+                    <td>跨尺度关联：区域→矿区→矿体→矿物</td>
+                    <td>多尺度推理能力</td>
+                    <td>~1,500条/500篇</td>
+                </tr>
+                <tr>
+                    <td><strong>knowledge_structure</strong></td>
+                    <td>系统性知识框架：章节逻辑、论证结构</td>
+                    <td>长文本组织能力</td>
+                    <td>~500套/500篇</td>
+                </tr>
+                <tr>
+                    <td><strong>contrastive_cases</strong></td>
+                    <td>对比分析：成矿vs非成矿、不同矿床类型对比</td>
+                    <td>S4 RL偏好对构建</td>
+                    <td>~3,000对/500篇</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">6</span>Spatial Embedding 层（核心创新）</h2>
+    <div class="decision-box">
+        <strong>核心理念：</strong>地质推理的本质是空间推理。Spatial Embedding层将地质概念、空间关系、尺度信息编码为可计算的向量表示，使模型具备"空间感知"能力。
+    </div>
+    <div class="card-grid" style="margin-top:20px;">
+        <div class="card">
+            <div class="card-icon" style="color:var(--secondary);">&#9670;</div>
+            <h4>概念空间向量库</h4>
+            <p>512维语义向量 + 128维空间属性向量。覆盖矿床类型、岩石组合、构造样式、蚀变类型等核心概念。</p>
+            <span class="tag tag-blue" style="margin-top:10px;">512+128维</span>
+        </div>
+        <div class="card">
+            <div class="card-icon" style="color:var(--accent);">&#9733;</div>
+            <h4>空间关系图谱</h4>
+            <p>分层架构：区域尺度(>100km) → 矿区尺度(1-10km) → 矿体尺度(<1km) → 矿物尺度(um级)。编码控矿要素的空间拓扑关系。</p>
+            <span class="tag tag-orange" style="margin-top:10px;">4级尺度</span>
+        </div>
+        <div class="card">
+            <div class="card-icon" style="color:var(--success);">&#9632;</div>
+            <h4>多尺度空间索引</h4>
+            <p>基于H3六边形网格的多分辨率索引。支持从全球尺度到矿体尺度的快速空间查询与关联检索。</p>
+            <span class="tag tag-green" style="margin-top:10px;">H3网格</span>
+        </div>
+        <div class="card">
+            <div class="card-icon" style="color:var(--danger);">&#9650;</div>
+            <h4>空间相似度检索</h4>
+            <p>基于FAISS的高效向量检索。支持"找到与目标区域地质特征最相似的已知矿床"类查询。</p>
+            <span class="tag tag-red" style="margin-top:10px;">FAISS引擎</span>
+        </div>
+    </div>
+    <div class="card" style="margin-top:20px;">
+        <h4 style="color:var(--primary);margin-bottom:12px;">与训练管线的集成</h4>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:0.95em;">
+            <span class="tag tag-blue">M5 知识图谱</span>
+            <span style="color:var(--accent);font-weight:700;">→</span>
+            <span class="tag tag-green">Spatial Embedding编码</span>
+            <span style="color:var(--accent);font-weight:700;">→</span>
+            <span class="tag tag-orange">注入S1/S3训练样本</span>
+            <span style="color:var(--accent);font-weight:700;">→</span>
+            <span class="tag tag-red">模型获得空间感知</span>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">7</span>训练样本产出规格</h2>
+    <div class="card">
+        <table>
+            <thead>
+                <tr><th>样本类型</th><th>代号</th><th>目标规模</th><th>说明</th><th>质量要求</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>长上下文文本预训练</strong></td>
+                    <td><span class="tag tag-blue">S1</span></td>
+                    <td style="font-weight:700;color:var(--primary);">≥ 50B token</td>
+                    <td>全文结构化文本，保留章节/段落/引用结构</td>
+                    <td>去重率>95%，CER≤1.5%</td>
+                </tr>
+                <tr>
+                    <td><strong>多模态VQA</strong></td>
+                    <td><span class="tag tag-green">S2</span></td>
+                    <td style="font-weight:700;color:var(--primary);">≥ 200万对</td>
+                    <td>图件+问答对：地质图解读、剖面分析、地球化学图解释</td>
+                    <td>答案准确率>90%</td>
+                </tr>
+                <tr>
+                    <td><strong>空间推理trace</strong></td>
+                    <td><span class="tag tag-orange">S3</span></td>
+                    <td style="font-weight:700;color:var(--primary);">≥ 5万条</td>
+                    <td>完整推理链：观察→空间关联→假设→验证→结论</td>
+                    <td>逻辑完整性>85%</td>
+                </tr>
+                <tr>
+                    <td><strong>RL偏好对</strong></td>
+                    <td><span class="tag tag-red">S4</span></td>
+                    <td style="font-weight:700;color:var(--primary);">≥ 10万对</td>
+                    <td>好/坏回答对比：正确推理vs常见错误</td>
+                    <td>标注一致性>80%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SECTION 8 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">8</span>6矿系覆盖</h2>
+    <div class="card">
+        <table>
+            <thead>
+                <tr><th>矿系代号</th><th>矿系名称</th><th>论文配额</th><th>核心作者/机构</th><th>空间信息类型</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>OROG-AU</strong></td>
+                    <td>造山型金矿</td>
+                    <td>~25,000</td>
+                    <td>Goldfarb, Groves, 中国地科院</td>
+                    <td>构造-流体通道、剪切带几何</td>
+                </tr>
+                <tr>
+                    <td><strong>PORP-CUMO</strong></td>
+                    <td>斑岩铜钼矿</td>
+                    <td>~22,000</td>
+                    <td>Sillitoe, Cooke, 侯增谦</td>
+                    <td>岩浆中心-蚀变分带、深部结构</td>
+                </tr>
+                <tr>
+                    <td><strong>VMS</strong></td>
+                    <td>火山成因块状硫化物</td>
+                    <td>~18,000</td>
+                    <td>Franklin, Gibson, Galley</td>
+                    <td>火山序列、海底地形、热液喷口</td>
+                </tr>
+                <tr>
+                    <td><strong>IOCG</strong></td>
+                    <td>铁氧化物铜金矿</td>
+                    <td>~15,000</td>
+                    <td>Hitzman, Williams, Groves</td>
+                    <td>区域构造、氧化还原界面</td>
+                </tr>
+                <tr>
+                    <td><strong>MUM-CUNI</strong></td>
+                    <td>岩浆铜镍硫化物</td>
+                    <td>~15,000</td>
+                    <td>Naldrett, Barnes, 汤中立</td>
+                    <td>岩浆通道、重力异常、岩相分带</td>
+                </tr>
+                <tr>
+                    <td><strong>LCT-LI</strong></td>
+                    <td>LCT型锂矿</td>
+                    <td>~15,000</td>
+                    <td>Cerny, London, 王登红</td>
+                    <td>伟晶岩带分布、区域变质梯度</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SECTION 9 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">9</span>质量门控</h2>
+    <div class="card">
+        <table>
+            <thead>
+                <tr><th>模块</th><th>指标</th><th>阈值</th><th>测试方法</th><th>状态</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>M1 版面解析</td>
+                    <td>Layout F1</td>
+                    <td style="font-weight:700;">≥ 0.92</td>
+                    <td>200页人工标注集</td>
+                    <td><span class="tag tag-orange">待验证</span></td>
+                </tr>
+                <tr>
+                    <td>M2 文本OCR</td>
+                    <td>CER (字符错误率)</td>
+                    <td style="font-weight:700;">≤ 1.5%</td>
+                    <td>500段落抽样对比</td>
+                    <td><span class="tag tag-orange">待验证</span></td>
+                </tr>
+                <tr>
+                    <td>M3 表格抽取</td>
+                    <td>Cell-F1</td>
+                    <td style="font-weight:700;">≥ 0.88</td>
+                    <td>100表格人工核对</td>
+                    <td><span class="tag tag-orange">待验证</span></td>
+                </tr>
+                <tr>
+                    <td>M4 图件分类</td>
+                    <td>Macro-F1</td>
+                    <td style="font-weight:700;">≥ 0.80</td>
+                    <td>500图件分类测试</td>
+                    <td><span class="tag tag-orange">待验证</span></td>
+                </tr>
+                <tr>
+                    <td>M5 知识图谱</td>
+                    <td>Entity-F1</td>
+                    <td style="font-weight:700;">≥ 0.78</td>
+                    <td>300句子NER标注</td>
+                    <td><span class="tag tag-orange">待验证</span></td>
+                </tr>
+                <tr>
+                    <td>M6 样本合成</td>
+                    <td>S1-S4产出量</td>
+                    <td style="font-weight:700;">达标</td>
+                    <td>自动统计 + 抽样质检</td>
+                    <td><span class="tag tag-orange">待验证</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="decision-box" style="margin-top:16px;">
+            <strong>门控规则：</strong>任一模块未达DoD阈值，不得进入下游模块。M1-M5串行依赖，M6依赖全部上游。
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 10 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">10</span>实施路线图</h2>
+    <div class="timeline">
+        <div class="timeline-item">
+            <span class="duration">Phase A.1 — 3天</span>
+            <h4>缺失目录 + 采集计划</h4>
+            <p>盘点现有数据资产，识别各矿系数据缺口，制定针对性采集计划。输出：数据缺口报告 + 采集优先级矩阵。</p>
+            <div style="margin-top:8px;">
+                <span class="tag tag-blue">数据盘点</span>
+                <span class="tag tag-blue">缺口分析</span>
+                <span class="tag tag-blue">采集计划</span>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <span class="duration">Phase A.2 — 11天</span>
+            <h4>采集 + 结构化处理</h4>
+            <p>执行M1-M5管线：批量PDF采集 → 版面解析 → OCR → 表格/图件抽取 → 知识图谱构建。输出：MSM-DocSchema格式的结构化数据。</p>
+            <div style="margin-top:8px;">
+                <span class="tag tag-green">M1-M5执行</span>
+                <span class="tag tag-green">质量门控</span>
+                <span class="tag tag-green">Schema验证</span>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <span class="duration">Phase A.3 — 7天</span>
+            <h4>博士论文推理链条 + Spatial Embedding</h4>
+            <p>博士论文深度处理：推理链条提取、多尺度关联构建、Spatial Embedding向量化。输出：S3推理trace + 空间向量库。</p>
+            <div style="margin-top:8px;">
+                <span class="tag tag-orange">推理链提取</span>
+                <span class="tag tag-orange">Spatial Embedding</span>
+                <span class="tag tag-orange">S3/S4合成</span>
+            </div>
+        </div>
+        <div class="timeline-item milestone">
+            <span class="duration" style="background:#c6f6d5;color:#276749;">交付节点</span>
+            <h4>Phase A 完成交付</h4>
+            <p>向后训练工程师交付：结构化数据集（S1-S4）+ Spatial Embedding向量库 + 数据质量报告 + 使用文档。</p>
+            <div style="margin-top:8px;">
+                <span class="tag tag-green">S1-S4数据集</span>
+                <span class="tag tag-green">向量库</span>
+                <span class="tag tag-green">质量报告</span>
+                <span class="tag tag-green">文档</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 11 -->
+<div class="section">
+    <h2 class="section-title"><span class="num">11</span>关键数字</h2>
+    <div class="summary-grid">
+        <div class="summary-item">
+            <div class="number">110,000+</div>
+            <div class="label">多源文档总量</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">6</div>
+            <div class="label">矿系全覆盖</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">S1 ≥ 50B</div>
+            <div class="label">预训练token</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">S2 ≥ 2M</div>
+            <div class="label">多模态VQA对</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">S3 ≥ 50K</div>
+            <div class="label">空间推理trace</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">S4 ≥ 100K</div>
+            <div class="label">RL偏好对</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">~21天</div>
+            <div class="label">数据准备周期</div>
+        </div>
+        <div class="summary-item">
+            <div class="number">640维</div>
+            <div class="label">Spatial Embedding</div>
+        </div>
+    </div>
+</div>
+
+</div><!-- end container -->
+
+<!-- FOOTER -->
+<div class="footer">
+    <p>LynAI Mining · Mineral System Model — 数据JSON化方案 v2.0 · 2026年5月</p>
+    <p style="margin-top:8px;opacity:0.7;font-size:0.85em;">Confidential — Internal Use Only</p>
+</div>
+
+</body>
+</html>
